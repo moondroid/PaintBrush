@@ -1,16 +1,17 @@
 package it.moondroid.paintbrush;
 
+import android.app.Activity;
 import android.graphics.Color;
-import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import it.moondroid.paintbrush.drawing.Brush;
+import it.moondroid.paintbrush.drawing.Brushes;
 import it.moondroid.paintbrush.drawing.PaintView;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -18,7 +19,10 @@ public class MainActivity extends ActionBarActivity {
         setContentView(R.layout.activity_main);
 
         PaintView paintView = (PaintView) findViewById(R.id.paint_view);
-        paintView.setBrush(new Brush());
+        Brushes.loadBrushList(getApplicationContext());
+        Brush brush = Brushes.get(getApplicationContext())[0];
+        brush.setScaledSize(0.2f);
+        paintView.setBrush(brush);
         paintView.setDrawingColor(Color.BLACK);
         paintView.setDrawingBgColor(Color.GRAY);
     }

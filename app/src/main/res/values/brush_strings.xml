@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="brush_Bamboo1Old">Bamboo1Old</string>
+    <string name="brush_Bamboo1">Bamboo1</string>
+    <string name="brush_Bamboo2">Bamboo2</string>
+    <string name="brush_Pen">Pen</string>
+    <string name="brush_HardPencil">HardPencil</string>
+    <string name="brush_SoftPencil">SoftPencil</string>
+    <string name="brush_InkPen">InkPen</string>
+    <string name="brush_HardEraser">HardEraser</string>
+    <string name="brush_SoftEraser">SoftEraser</string>
+    <string name="brush_BallpointPen">BallpointPen</string>
+    <string name="brush_AirBrush">AirBrush</string>
+    <string name="brush_Oil">Oil</string>
+    <string name="brush_FeltPen">FeltPen</string>
+    <string name="brush_WaterColor">WaterColor</string>
+    <string name="brush_OilPastel">OilPastel</string>
+    <string name="brush_Pastel">Pastel</string>
+    <string name="brush_HardPastel">HardPastel</string>
+    <string name="brush_Creyon">Creyon</string>
+    <string name="brush_Calligraphy">Calligraphy</string>
+    <string name="brush_Knife1">Knife1</string>
+    <string name="brush_Knife2">Knife2</string>
+    <string name="brush_CombKnife">CombKnife</string>
+    <string name="brush_ColorlessOil">ColorlessOil</string>
+    <string name="brush_Finger">Finger</string>
+    <string name="brush_InkSpot">InkSpot</string>
+    <string name="brush_Flowers">Flowers</string>
+    <string name="brush_Fish">Fish</string>
+    <string name="brush_Sponge">Sponge</string>
+    <string name="brush_ImageVanGogh">VanGogh</string>
+    <string name="brush_ImageRenoir">Renoir</string>
+    <string name="brush_ImageSeurat">Seurat</string>
+    <string name="brush_ImageWetCanvas">WetCanvas</string>
+    <string name="brush_ImageWetSponge">WetSponge</string>
+    <string name="brush_ImageImpress">Impress</string>
+    <string name="brush_ImageOil">Oil</string>
+    <string name="brush_ImageWaterColor">WaterColor</string>
+    <string name="brush_ImageAcrylic">Acrylic</string>
+    <string name="brush_ImagePen">Pen</string>
+    <string name="brush_ImageFish">Fish</string>
+    <string name="brush_ImageFlowers">Flowers</string>
+    <string name="brush_ImageHardPastel">HardPastel</string>
+    <string name="brush_ImageAirBrush">AirBrush</string>
+    <string name="brush_ImageOilPastel">OilPastel</string>
+
+</resources>

@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="Brush">
+        <attr name="angle" format="float" />
+        <attr name="angleJitter" format="float" />
+        <attr name="autoStrokeCount" format="integer" />
+        <attr name="autoStrokeDistribution" format="float" />
+        <attr name="autoStrokeJointPitch" format="float" />
+        <attr name="autoStrokeLength" format="integer" />
+        <attr name="autoStrokeStraight" format="float" />
+        <attr name="colorPatchAlpha" format="float" />
+        <attr name="coloringType">
+            <enum name="normal" value="0" />
+            <enum name="imageAllTime" value="1" />
+            <enum name="imageInitTime" value="2" />
+        </attr>
+        <attr name="icon" format="reference" />
+        <attr name="isEraser" format="boolean" />
+        <attr name="jitterBrightness" format="float" />
+        <attr name="jitterHue" format="float" />
+        <attr name="jitterSaturation" format="float" />
+        <attr name="lineEndAlphaScale" format="float" />
+        <attr name="lineEndFadeLength" format="integer" />
+        <attr name="lineEndSizeScale" format="float" />
+        <attr name="lineEndSpeedLength" format="float" />
+        <attr name="lineTaperFadeLength" format="integer" />
+        <attr name="lineTaperStartLength" format="integer" />
+        <attr name="maskImageArray0" format="reference" />
+        <attr name="maskImageArray1" format="reference" />
+        <attr name="maskImageArray2" format="reference" />
+        <attr name="maskImageArray3" format="reference" />
+        <attr name="maskImageArray4" format="reference" />
+        <attr name="maskImageArray5" format="reference" />
+        <attr name="maskImageArray6" format="reference" />
+        <attr name="maskImageArray7" format="reference" />
+        <attr name="maskImageArray8" format="reference" />
+        <attr name="maskImageArray9" format="reference" />
+        <attr name="maxSize" format="dimension" />
+        <attr name="minSize" format="dimension" />
+        <attr name="name" format="string" />
+        <attr name="preview" format="reference" />
+        <attr name="size" format="dimension" />
+        <attr name="smudgingPatchAlpha" format="float" />
+        <attr name="spacing" format="float" />
+        <attr name="spread" format="float" />
+        <attr name="textureDepth" format="float" />
+        <attr name="threadPriority" format="float" />
+        <attr name="traceMode" format="boolean" />
+        <attr name="useDeviceAngle" format="boolean" />
+        <attr name="useFirstJitter" format="boolean" />
+        <attr name="useFlowingAngle" format="boolean" />
+        <attr name="useSmudging" format="boolean" />
+        <attr name="useThread" format="boolean" />
+        <attr name="defaultColor" format="color" />
+        <attr name="maskDrawable" format="reference" />
+        <attr name="maskWidth" format="dimension" />
+        <attr name="maskRoundRadius" format="dimension" />
+        <attr name="innerRadius" format="dimension" />
+        <attr name="outerRadius" format="dimension" />
+        <attr name="thumb" format="reference" />
+        <attr name="layerBackground" format="reference" />
+        <attr name="layerMask" format="reference" />
+        <attr name="layerMaskedShader" format="reference" />
+        <attr name="layerForeground" format="reference" />
+        <attr name="eclipseOffsetX" format="dimension" />
+        <attr name="eclipseOffsetY" format="dimension" />
+        <attr name="eclipseRadius" format="dimension" />
+    </declare-styleable>
+
+</resources>
