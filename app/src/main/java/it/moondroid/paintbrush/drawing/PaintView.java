@@ -119,8 +119,13 @@ public class PaintView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+
+        canvas.save();
         canvas.getClipBounds(this.mOnDrawCanvasRect);
         drawToCanvas(canvas, mOnDrawCanvasRect);
+        canvas.restore();
+
+        invalidate(mOnDrawCanvasRect);
     }
 
     private void drawToCanvas(Canvas canvas, Rect rect) {
