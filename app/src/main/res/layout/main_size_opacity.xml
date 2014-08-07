@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:layout_centerInParent="true"
+    android:orientation="vertical">
+
+    <TextView
+        style="@style/MainGradientSeekBarText"
+        android:text="@string/size" />
+
+    <SeekBar
+        android:id="@+id/sizePopupSeekbar"
+        style="@style/MainGradientSeekBar"
+        android:paddingBottom="1.5dip"
+         />
+
+    <SeekBar
+        android:id="@+id/opacityPopupSeekbar"
+        style="@style/MainGradientSeekBar"
+        android:paddingTop="1.5dip"
+         />
+
+    <TextView
+        style="@style/MainGradientSeekBarText"
+        android:text="@string/opacity" />
+</LinearLayout>

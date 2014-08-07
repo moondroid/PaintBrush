@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent">
+
+    <it.moondroid.paintbrush.drawing.PaintView
+        android:id="@+id/paint_view"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent" />
+
+    <!--<LinearLayout-->
+        <!--android:id="@id/gnbButtonsLayout"-->
+        <!--android:layout_width="fill_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentTop="true">-->
+
+        <!--<Button-->
+            <!--android:id="@id/gnbButtonGallery"-->
+            <!--style="@style/GNBButton"-->
+            <!--android:drawableTop="@drawable/icon_gallery"-->
+            <!--android:text="@string/gallery" />-->
+
+        <!--<Button-->
+            <!--android:id="@id/gnbButtonPhoto"-->
+            <!--style="@style/GNBButton"-->
+            <!--android:drawableTop="@drawable/icon_photo"-->
+            <!--android:text="@string/photo" />-->
+
+        <!--<Button-->
+            <!--android:id="@id/gnbButtonDelete"-->
+            <!--style="@style/GNBButton"-->
+            <!--android:drawableTop="@drawable/icon_delete"-->
+            <!--android:text="@string/delete" />-->
+
+        <!--<Button-->
+            <!--android:id="@id/gnbButtonSend"-->
+            <!--style="@style/GNBButton"-->
+            <!--android:drawableTop="@drawable/icon_send"-->
+            <!--android:text="@string/send"-->
+            <!--android:textColor="#ff46d11a" />-->
+    <!--</LinearLayout>-->
+
+    <!--<ImageView-->
+        <!--android:id="@id/gnbButtonsLayoutShadow"-->
+        <!--android:layout_width="fill_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_below="@id/gnbButtonsLayout"-->
+        <!--android:background="@drawable/gnb_shadow" />-->
+
+    <!--<ImageView-->
+        <!--android:id="@id/undoButton"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentLeft="true"-->
+        <!--android:layout_below="@id/gnbButtonsLayout"-->
+        <!--android:enabled="false"-->
+        <!--android:paddingLeft="@dimen/mainUndoRedoButtonPaddingLeftRight"-->
+        <!--android:paddingTop="@dimen/mainUndoRedoButtonPaddingTop"-->
+        <!--android:src="@drawable/undo_button" />-->
+
+    <!--<ImageView-->
+        <!--android:id="@id/redoButton"-->
+        <!--android:layout_width="wrap_content"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentRight="true"-->
+        <!--android:layout_below="@id/gnbButtonsLayout"-->
+        <!--android:enabled="false"-->
+        <!--android:paddingRight="@dimen/mainUndoRedoButtonPaddingLeftRight"-->
+        <!--android:paddingTop="@dimen/mainUndoRedoButtonPaddingTop"-->
+        <!--android:src="@drawable/redo_button" />-->
+
+    <RelativeLayout
+        android:id="@+id/paletteLayout"
+        android:layout_width="fill_parent"
+        android:layout_height="@dimen/mainPaletteLayoutHeight"
+        android:layout_alignParentBottom="true"
+        android:background="@drawable/palette_pattern_tile"
+        android:clickable="true">
+
+        <ImageView
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:background="@drawable/palette_brightness" />
+
+        <LinearLayout
+            android:id="@+id/brushButtonsLayout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentLeft="true"
+            android:layout_marginLeft="@dimen/mainBrushesButtonLeftMargin">
+
+            <ImageView
+                android:id="@+id/firstBrushButton"
+                style="@style/RecentBrushBigButton" />
+
+            <ImageView
+                android:id="@+id/secondBrushButton"
+                style="@style/RecentBrushSmallButton" />
+        </LinearLayout>
+
+        <include layout="@layout/main_size_opacity" />
+
+        <!--<it.moondroid.paintbrush.widget.ColorMaskView-->
+            <!--android:id="@id/currentColorButton"-->
+            <!--android:layout_width="wrap_content"-->
+            <!--android:layout_height="wrap_content"-->
+            <!--android:layout_alignParentRight="true"-->
+            <!--android:layout_centerVertical="true"-->
+            <!--android:layout_marginRight="@dimen/mainColorPreviewRightMargin"-->
+            <!--android:clickable="true"-->
+            <!--app:layerBackground="@drawable/color_palette_bottom_bg"-->
+            <!--app:layerForeground="@drawable/color_palette_top_btn"-->
+            <!--app:layerMask="@drawable/color_palette_center_mask" />-->
+        <FrameLayout
+            android:id="@+id/currentColorButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentRight="true"
+            android:layout_centerVertical="true"
+            android:layout_marginRight="@dimen/mainColorPreviewRightMargin"
+            android:clickable="true"
+            android:background="@drawable/color_palette_bottom_bg"
+            android:foreground="@drawable/color_palette_top_btn" />
+
+    </RelativeLayout>
+
+    <ImageView
+        android:id="@+id/paletteLayoutShadow"
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/paletteLayout"
+        android:background="@drawable/palette_shadow" />
+
+    <ImageView
+        android:id="@+id/bgToggleButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@id/paletteLayout"
+        android:layout_alignParentRight="true"
+        android:enabled="false"
+        android:paddingBottom="@dimen/mainUndoRedoButtonPaddingTop"
+        android:paddingLeft="@dimen/mainUndoRedoButtonPaddingLeftRight"
+        android:paddingRight="@dimen/mainUndoRedoButtonPaddingLeftRight"
+        android:src="@drawable/bg_visibility_toggle_selector" />
+</RelativeLayout>

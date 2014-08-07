@@ -5,4 +5,34 @@
         <!-- Customize your theme here. -->
     </style>
 
+    <style name="RecentBrushBigButton">
+        <item name="android:layout_gravity">bottom</item>
+        <item name="android:layout_width">@dimen/mainRecentBrushBigButtonLayoutWidth</item>
+        <item name="android:layout_height">@dimen/mainRecentBrushBigButtonLayoutHeight</item>
+        <item name="android:scaleType">fitXY</item>
+    </style>
+    <style name="RecentBrushSmallButton">
+        <item name="android:layout_gravity">bottom</item>
+        <item name="android:layout_width">@dimen/mainRecentBrushSmallButtonLayoutWidth</item>
+        <item name="android:layout_height">@dimen/mainRecentBrushSmallButtonLayoutHeight</item>
+        <item name="android:layout_marginLeft">@dimen/mainRecentBrushSmallButtonMarginLeft</item>
+        <item name="android:scaleType">fitXY</item>
+    </style>
+    <style name="MainGradientSeekBarText">
+        <item name="android:textSize">@dimen/mainSizeOpacityTextSize</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textColor">#ff5c646b</item>
+        <item name="android:layout_gravity">center_horizontal</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+    <style name="MainGradientSeekBar">
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:thumb">@drawable/brush_scroll</item>
+        <item name="android:thumbOffset">0.0dip</item>
+        <item name="android:startColor">#00000000</item>
+        <item name="android:endColor">#ff000000</item>
+    </style>
+
 </resources>
