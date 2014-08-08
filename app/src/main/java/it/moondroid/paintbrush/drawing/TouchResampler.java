@@ -6,6 +6,7 @@ package it.moondroid.paintbrush.drawing;
 
 
 import android.os.Build.VERSION;
+import android.util.Log;
 import android.view.MotionEvent;
 
 public abstract class TouchResampler {
@@ -44,17 +45,23 @@ public abstract class TouchResampler {
         long t = event.getEventTime() - event.getDownTime();
         switch ((VERSION.SDK_INT >= 8 ? event.getActionMasked() : event.getAction() & 255)) {
             case MotionEvent.ACTION_DOWN:
+                Log.d("TouchResampler", "ACTION_DOWN");
                 startPath(x, y, t);
+                break;
             case MotionEvent.ACTION_UP:
+                Log.d("TouchResampler", "ACTION_UP");
                 addToPath(x, y, t, false);
                 endPath();
+                break;
             case MotionEvent.ACTION_MOVE:
+                Log.d("TouchResampler", "ACTION_MOVE");
                 int i = 0;
                 while (i < event.getHistorySize()) {
                     addToPath(event.getHistoricalX(i), event.getHistoricalY(i), event.getHistoricalEventTime(i) - event.getDownTime(), true);
                     i++;
                 }
                 addToPath(x, y, t, true);
+                break;
             default:
                 break;
         }

@@ -9,6 +9,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.os.Build;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -45,6 +46,16 @@ public class PaintView extends View {
     private Paint mSrcPaint;
     private Paint mDstOutPaint;
 
+    private OnTouchHandler mCurveDrawingHandler;
+    private TouchResampler mTouchResampler;
+    private float mMaxVelocityScale;
+    private static float VELOCITY_MAX_SCALE = 130.0f;
+
+
+    private static interface OnTouchHandler {
+        boolean onTouchEvent(int i, MotionEvent motionEvent);
+    }
+
 
     public PaintView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -71,6 +82,17 @@ public class PaintView extends View {
         mSrcPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
         mDstOutPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
 
+        this.mCurveDrawingHandler = new OnTouchHandler() {
+            public boolean onTouchEvent(int action, MotionEvent event) {
+                if (!PaintView.this.mBrush.traceMode) {
+                    mTouchResampler.onTouchEvent(event);
+                    return true;
+                }
+                return false;
+            }
+        };
+
+        this.mTouchResampler = new MyTouchDistanceResampler();
     }
 
     public void setBrush(Brush brush) {
@@ -83,6 +105,9 @@ public class PaintView extends View {
 
         mPathLayer = Bitmap.createBitmap((int) mPathWidth, (int) mPathWidth, Bitmap.Config.ARGB_8888);
         mPathLayerCanvas.setBitmap(this.mPathLayer);
+
+        mMaxVelocityScale = (brush.size * brush.lineEndSpeedLength) / VELOCITY_MAX_SCALE;
+
     }
 
     public Brush getBrush() {
@@ -131,30 +156,16 @@ public class PaintView extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
 
-        float x = event.getX();
-        float y = event.getY();
-
-        switch (event.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                mLastDrawDistance = 0.0f;
-                moveToThread(x, y);
-                return true;
-
-            case MotionEvent.ACTION_MOVE:
-                if (this.mLastDrawDistance > 0.0f) {
-                    addSpot(x, y, 0.0f, 0.0f);
-                }
-                float tipSpeedScale = 1.0f;
-                this.mLastDrawDistance += mSpacing * tipSpeedScale;
-                return true;
-
-            case MotionEvent.ACTION_UP:
-
-                return true;
-
-            default:
-                return false;
+        if (this.mBrush == null) {
+            return super.onTouchEvent(event);
         }
+        int action = Build.VERSION.SDK_INT >= 8 ? event.getActionMasked() : event.getAction() & 255;
+
+        if (this.mCurveDrawingHandler != null) {
+            return this.mCurveDrawingHandler.onTouchEvent(action, event);
+        }
+
+        return false;
 
     }
 
@@ -223,6 +234,55 @@ public class PaintView extends View {
         this.mDrawingLayerCanvas.drawBitmap(mPathLayer, x - this.mPathWidthHalf, y - this.mPathWidthHalf, mNormalPaint);
     }
 
+
+
+    private class MyTouchDistanceResampler extends TouchDistanceResampler {
+        private float mLastDrawDistance;
+        private float[] mTempXYV = new float[3];
+
+        @Override
+        protected void onTouchDown(float x, float y) {
+            Log.d("PaintView", "onTouchDown");
+            this.mLastDrawDistance = 0.0f;
+            PaintView.this.moveToThread(x, y);
+        }
+
+        @Override
+        protected void onTouchMove(float x, float y, float t) {
+            Log.d("PaintView", "onTouchMove");
+            Brush brush = PaintView.this.mBrush;
+
+            while (getXYVAtDistance(this.mLastDrawDistance, this.mTempXYV)) {
+                float tipSpeedScale;
+                float tipSpeedAlpha;
+                float px = this.mTempXYV[0];
+                float py = this.mTempXYV[1];
+                float pv = this.mTempXYV[2];
+                if (brush.lineEndSpeedLength > 0.0f) {
+                    float velocityLevel;
+                    velocityLevel = pv > PaintView.this.mMaxVelocityScale ? 1.0f : pv / PaintView.this.mMaxVelocityScale;
+                    tipSpeedScale = brush.lineEndSizeScale + (1.0f - velocityLevel) * (1.0f - brush.lineEndSizeScale);
+                    tipSpeedAlpha = brush.lineEndAlphaScale + (1.0f - velocityLevel) * (1.0f - brush.lineEndAlphaScale);
+                } else {
+                    tipSpeedScale = 1.0f;
+                    tipSpeedAlpha = 1.0f;
+                }
+                if (this.mLastDrawDistance > 0.0f) {
+
+                    Log.d("PaintView", "onTouchMove "+px+", "+py);
+                    PaintView.this.addSpot(px, py, tipSpeedScale, tipSpeedAlpha);
+                }
+                this.mLastDrawDistance += PaintView.this.mSpacing * tipSpeedScale;
+            }
+
+        }
+
+        @Override
+        protected void onTouchUp() {
+            Log.d("PaintView", "onTouchUp");
+            //PaintView.this.destLineThread();
+        }
+    }
 
 
 }
