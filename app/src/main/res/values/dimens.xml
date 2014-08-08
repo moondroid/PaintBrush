@@ -15,4 +15,5 @@
     <dimen name="mainRecentBrushSmallButtonLayoutHeight">43.664978dip</dimen>
     <dimen name="mainRecentBrushSmallButtonMarginLeft">-14.0dip</dimen>
     <dimen name="mainColorPreviewRightMargin">13.329987dip</dimen>
+    <dimen name="mainColorPreviewWidth">73dip</dimen>
 </resources>
