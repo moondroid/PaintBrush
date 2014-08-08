@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content">
+
+    <view
+        android:id="@+id/sizePopupCircle"
+        class="it.moondroid.paintbrush.widget.SizePopupWindow$CircleView"
+        android:layout_width="fill_parent"
+        android:layout_height="fill_parent"
+        android:layout_gravity="center" />
+
+    <TextView
+        android:id="@+id/sizePopupText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:textColor="#ff777777"
+        android:textSize="16.0sp"
+        android:textStyle="bold" />
+</FrameLayout>

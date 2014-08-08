@@ -6,8 +6,9 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.support.v4.view.MotionEventCompat;
+import android.graphics.RectF;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -23,6 +24,7 @@ public class PaintView extends View {
     private Brush mBrush;
     private int mColor;
     private int mLineColor;
+    private float mDrawingAlpha;
     private int mBackgroundLayerColor;
 
     private float mLastDrawDistance;
@@ -35,14 +37,22 @@ public class PaintView extends View {
     private Canvas mPathLayerCanvas;
     private float mPathWidth;
     private float mPathWidthHalf;
+    private Bitmap mMergedLayer;
+    private Canvas mMergedLayerCanvas;
+    private RectF mLineDirtyRect;
 
     private Paint mNormalPaint;
+    private Paint mSrcPaint;
+    private Paint mDstOutPaint;
 
 
     public PaintView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
         mNormalPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
+        mSrcPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
+        mDstOutPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
+
 //        mNormalPaint.setAntiAlias(true);
 //        mNormalPaint.setColor(Color.BLACK);
 //        paint.setStyle(Paint.Style.STROKE);
@@ -51,8 +61,15 @@ public class PaintView extends View {
 
         mDrawingLayerCanvas = new Canvas();
         mPathLayerCanvas = new Canvas();
+        this.mMergedLayerCanvas = new Canvas();
 
         mOnDrawCanvasRect = new Rect();
+        mLineDirtyRect = new RectF();
+
+        mDrawingAlpha = 1.0f;
+
+        mSrcPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
+        mDstOutPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
 
     }
 
@@ -68,6 +85,11 @@ public class PaintView extends View {
         mPathLayerCanvas.setBitmap(this.mPathLayer);
     }
 
+    public Brush getBrush() {
+        return mBrush;
+    }
+
+
     public void setDrawingColor(int color) {
         mColor = color;
     }
@@ -77,12 +99,33 @@ public class PaintView extends View {
         invalidate();
     }
 
+    public float getDrawingScaledSize() {
+        return mBrush.getScaledSize();
+    }
+
+    public void setDrawingScaledSize(float scaledSize) {
+        if (mBrush.setScaledSize(scaledSize)) {
+            setBrush(mBrush);
+        }
+    }
+
+    public void setDrawingAlpha(float alpha) {
+        this.mDrawingAlpha = alpha;
+    }
+
+    public float getDrawingAlpha() {
+        return this.mDrawingAlpha;
+    }
+
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
 
         mDrawingLayer = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         mDrawingLayerCanvas.setBitmap(mDrawingLayer);
+        this.mMergedLayer = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
+        this.mMergedLayerCanvas.setBitmap(this.mMergedLayer);
+
     }
 
     @Override
@@ -138,6 +181,7 @@ public class PaintView extends View {
         }
 
         canvas.drawBitmap(mDrawingLayer, 0.0f, 0.0f, mNormalPaint);
+
         canvas.restore();
 
     }
@@ -167,15 +211,18 @@ public class PaintView extends View {
     }
 
     private void fillBrushWithColor(Brush brush, float x, float y, float tipAlpha) {
-        int color = mLineColor;
-
+        //int color = mLineColor;
+        int color = Color.argb((int) (mDrawingAlpha * 255.0f), Color.red(mLineColor), Color.green(mLineColor), Color.blue(mLineColor));
         this.mPathLayerCanvas.drawColor(color, PorterDuff.Mode.SRC);
+
     }
 
     private void drawBrushWithScale(float x, float y, float tipScale) {
-        Log.d("PaintView","drawBrushWithScale x:"+x+" y:"+y);
+
         this.mNormalPaint.setAlpha(255);
         this.mDrawingLayerCanvas.drawBitmap(mPathLayer, x - this.mPathWidthHalf, y - this.mPathWidthHalf, mNormalPaint);
     }
 
- }
+
+
+}

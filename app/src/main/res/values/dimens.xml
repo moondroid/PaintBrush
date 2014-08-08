@@ -16,4 +16,8 @@
     <dimen name="mainRecentBrushSmallButtonMarginLeft">-14.0dip</dimen>
     <dimen name="mainColorPreviewRightMargin">13.329987dip</dimen>
     <dimen name="mainColorPreviewWidth">73dip</dimen>
+
+    <dimen name="popup_width">161.32999dip</dimen>
+    <dimen name="popup_height">161.32999dip</dimen>
+
 </resources>

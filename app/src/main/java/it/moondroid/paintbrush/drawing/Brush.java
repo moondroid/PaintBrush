@@ -2,6 +2,7 @@ package it.moondroid.paintbrush.drawing;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.util.Log;
 
 import it.moondroid.paintbrush.R;
 

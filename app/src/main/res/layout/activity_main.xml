@@ -48,17 +48,15 @@
                 style="@style/MainGradientSeekBarText"
                 android:text="@string/size" />
 
-            <SeekBar
+            <it.moondroid.paintbrush.widget.PopupSeekBar
                 android:id="@+id/sizePopupSeekbar"
                 style="@style/MainGradientSeekBar"
-                android:paddingBottom="1.5dip"
-                />
+                android:paddingBottom="1.5dip"/>
 
-            <SeekBar
+            <it.moondroid.paintbrush.widget.PopupSeekBar
                 android:id="@+id/opacityPopupSeekbar"
                 style="@style/MainGradientSeekBar"
-                android:paddingTop="1.5dip"
-                />
+                android:paddingTop="1.5dip"/>
 
             <TextView
                 style="@style/MainGradientSeekBarText"
