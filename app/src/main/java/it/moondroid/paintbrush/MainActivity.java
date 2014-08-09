@@ -74,7 +74,7 @@ public class MainActivity extends Activity {
         mOpacitySeekBar.setValuePopupWindow(new OpacityPopupWindow(this));
 
         setScaledSize(mPaintView.getDrawingScaledSize());
-        setOpacity(1.0f);
+        setOpacity(0.5f);
     }
 
 
