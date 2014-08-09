@@ -28,9 +28,8 @@ public class MainActivity extends Activity {
         setContentView(R.layout.activity_main);
 
         mPaintView = (PaintView) findViewById(R.id.paint_view);
-        Brushes.loadBrushList(getApplicationContext());
+
         Brush brush = Brushes.get(getApplicationContext())[0];
-        //brush.setScaledSize(0.2f);
 
         mPaintView.setBrush(brush);
         mPaintView.setDrawingColor(Color.BLACK);
