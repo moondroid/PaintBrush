@@ -1,7 +1,9 @@
 package it.moondroid.paintbrush.drawing;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
@@ -44,12 +46,17 @@ public class PaintView extends View {
 
     private Paint mNormalPaint;
     private Paint mSrcPaint;
+    private Paint mDstInPaint;
     private Paint mDstOutPaint;
 
     private OnTouchHandler mCurveDrawingHandler;
     private TouchResampler mTouchResampler;
     private float mMaxVelocityScale;
     private static float VELOCITY_MAX_SCALE = 130.0f;
+    private static final Bitmap EMPTY_BITMAP = Build.VERSION.SDK_INT < 14 ? Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888) : null;
+
+    private Bitmap[] mMaskBitmap;
+    private int mMaskPadding;
 
 
     private static interface OnTouchHandler {
@@ -62,6 +69,7 @@ public class PaintView extends View {
 
         mNormalPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
         mSrcPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
+        mDstInPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
         mDstOutPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
 
 //        mNormalPaint.setAntiAlias(true);
@@ -80,6 +88,7 @@ public class PaintView extends View {
         mDrawingAlpha = 1.0f;
 
         mSrcPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
+        mDstInPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_IN));
         mDstOutPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
 
         this.mCurveDrawingHandler = new OnTouchHandler() {
@@ -108,7 +117,33 @@ public class PaintView extends View {
 
         mMaxVelocityScale = (brush.size * brush.lineEndSpeedLength) / VELOCITY_MAX_SCALE;
 
+        this.mMaskBitmap = new Bitmap[brush.maskImageIdArray.length];
+        this.mMaskPadding = (int) (this.mPathWidth / 3.5f);
+        int i = 0;
+        while (i < this.mMaskBitmap.length) {
+            this.mMaskBitmap[i] = decodeScaledExpandResource(getResources(), brush.maskImageIdArray[i], (int) this.mPathWidth, (int) this.mPathWidth, this.mMaskPadding);
+            i++;
+        }
+
     }
+
+    private static Bitmap decodeScaledExpandResource(Resources res, int id, int width, int height, int padding) {
+        Bitmap src = BitmapFactory.decodeResource(res, id);
+        if (src == null) {
+            return null;
+        }
+        Bitmap dst = Bitmap.createBitmap(padding * 2 + width, padding * 2 + height, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(dst);
+        c.drawBitmap(src, new Rect(0, 0, src.getWidth(), src.getHeight()), new Rect(padding, padding, padding + width, padding + height), null);
+        c.setBitmap(EMPTY_BITMAP);
+        if (src == dst) {
+            return dst;
+        }
+        src.recycle();
+        return dst;
+    }
+
+
 
     public Brush getBrush() {
         return mBrush;
@@ -218,6 +253,7 @@ public class PaintView extends View {
         Brush brush = mBrush;
 
         fillBrushWithColor(brush, drawX, drawY, tipAlpha);
+        maskBrushWithAngle(brush, 0.0f, tipAlpha);
         drawBrushWithScale(drawX, drawY, tipScale);
     }
 
@@ -225,6 +261,16 @@ public class PaintView extends View {
         //int color = mLineColor;
         int color = Color.argb((int) (mDrawingAlpha * 255.0f), Color.red(mLineColor), Color.green(mLineColor), Color.blue(mLineColor));
         this.mPathLayerCanvas.drawColor(color, PorterDuff.Mode.SRC);
+
+    }
+
+    private void maskBrushWithAngle(Brush brush, float angle, float tipAlpha) {
+        //this.mDstInPaint.setAlpha((int) ((tipAlpha * tipAlpha) * 255.0f));
+        this.mDstInPaint.setAlpha(255);
+        if (mMaskBitmap.length >= 1){
+            Bitmap maskLayer = this.mMaskBitmap[0];
+            this.mPathLayerCanvas.drawBitmap(maskLayer, (float) (-this.mMaskPadding), (float) (-this.mMaskPadding), this.mDstInPaint);
+        }
 
     }
 
