@@ -208,7 +208,7 @@
         <item name="maskImageArray0">@drawable/brush_04</item>
         <item name="maxSize">25.20633dip</item>
         <item name="minSize">3.7460022dip</item>
-        <item name="name">@string/brush_HardPencil</item>
+        <item name="name">@string/brush_SoftPencil</item>
         <item name="preview">@drawable/stylishbrush_soft_pencil</item>
         <item name="size">4.634918dip</item>
         <item name="smudgingPatchAlpha">0.0</item>
