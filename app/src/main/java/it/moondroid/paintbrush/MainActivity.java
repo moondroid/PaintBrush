@@ -6,6 +6,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.SeekBar;
 
 import it.moondroid.paintbrush.drawing.Brush;
@@ -22,14 +23,18 @@ public class MainActivity extends Activity {
     private PopupSeekBar mSizeSeekBar;
     private PopupSeekBar mOpacitySeekBar;
 
+    private ImageView mFirstBrushButton;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         mPaintView = (PaintView) findViewById(R.id.paint_view);
+        mFirstBrushButton = (ImageView)findViewById(R.id.firstBrushButton);
 
         Brush brush = Brushes.get(getApplicationContext())[0];
+        mFirstBrushButton.setImageResource(brush.iconId);
 
         mPaintView.setBrush(brush);
         mPaintView.setDrawingColor(Color.BLACK);
@@ -117,6 +122,7 @@ public class MainActivity extends Activity {
         if(id>=0 && id<brushes.length){
             if(mPaintView!=null){
                 mPaintView.setBrush(brushes[id]);
+                mFirstBrushButton.setImageResource(brushes[id].iconId);
                 return true;
             }
         }
