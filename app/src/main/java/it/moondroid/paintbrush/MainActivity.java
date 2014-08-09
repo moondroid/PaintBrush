@@ -33,7 +33,7 @@ public class MainActivity extends Activity {
 
         mPaintView.setBrush(brush);
         mPaintView.setDrawingColor(Color.BLACK);
-        mPaintView.setDrawingBgColor(Color.GRAY);
+        mPaintView.setDrawingBgColor(Color.WHITE);
 
         this.mSizeSeekBar = (PopupSeekBar) findViewById(R.id.sizePopupSeekbar);
         this.mSizeSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
