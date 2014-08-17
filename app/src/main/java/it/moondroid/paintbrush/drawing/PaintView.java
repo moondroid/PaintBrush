@@ -13,9 +13,12 @@ import android.graphics.Rect;
 import android.graphics.RectF;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.FloatMath;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+
+import java.util.Random;
 
 /**
  * Created by marco.granatiero on 07/08/2014.
@@ -58,6 +61,7 @@ public class PaintView extends View {
     private Bitmap[] mMaskBitmap;
     private int mMaskPadding;
 
+    private Random mRandom;
 
     private static interface OnTouchHandler {
         boolean onTouchEvent(int i, MotionEvent motionEvent);
@@ -102,6 +106,8 @@ public class PaintView extends View {
         };
 
         this.mTouchResampler = new MyTouchDistanceResampler();
+
+        mRandom = new Random();
     }
 
     public void setBrush(Brush brush) {
@@ -251,6 +257,12 @@ public class PaintView extends View {
         float drawX = x;
         float drawY = y;
         Brush brush = mBrush;
+
+        if (brush.spread > 0.0f) {
+            float spreadAngle = this.mRandom.nextFloat() * 6.2831855f;
+            drawX += (FloatMath.cos(spreadAngle) * brush.spread) * brush.size;
+            drawY += (FloatMath.sin(spreadAngle) * brush.spread) * brush.size;
+        }
 
         fillBrushWithColor(brush, drawX, drawY, tipAlpha);
         maskBrushWithAngle(brush, 0.0f, tipAlpha);
