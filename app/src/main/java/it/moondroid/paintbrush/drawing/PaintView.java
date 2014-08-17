@@ -277,7 +277,18 @@ public class PaintView extends View {
     private void drawBrushWithScale(float x, float y, float tipScale) {
 
         this.mNormalPaint.setAlpha(255);
-        this.mDrawingLayerCanvas.drawBitmap(mPathLayer, x - this.mPathWidthHalf, y - this.mPathWidthHalf, mNormalPaint);
+
+        if (tipScale == 1.0f) {
+            mDrawingLayerCanvas.drawBitmap(mPathLayer, x - mPathWidthHalf, y - mPathWidthHalf, mNormalPaint);
+        }else{
+            mDrawingLayerCanvas.save();
+            mDrawingLayerCanvas.translate(x, y);
+            mDrawingLayerCanvas.scale(tipScale, tipScale);
+            mDrawingLayerCanvas.drawBitmap(mPathLayer, -mPathWidthHalf, -mPathWidthHalf, mNormalPaint);
+            mDrawingLayerCanvas.restore();
+        }
+
+
     }
 
 
