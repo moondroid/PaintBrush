@@ -259,17 +259,17 @@ public class PaintView extends View {
 
     private void fillBrushWithColor(Brush brush, float x, float y, float tipAlpha) {
         //int color = mLineColor;
-        int color = Color.argb((int) (mDrawingAlpha * 255.0f), Color.red(mLineColor), Color.green(mLineColor), Color.blue(mLineColor));
+        int color = Color.argb((int) (mDrawingAlpha * tipAlpha * 255.0f), Color.red(mLineColor), Color.green(mLineColor), Color.blue(mLineColor));
         this.mPathLayerCanvas.drawColor(color, PorterDuff.Mode.SRC);
 
     }
 
     private void maskBrushWithAngle(Brush brush, float angle, float tipAlpha) {
-        //this.mDstInPaint.setAlpha((int) ((tipAlpha * tipAlpha) * 255.0f));
-        this.mDstInPaint.setAlpha(255);
+
+        mDstInPaint.setAlpha((int) ((tipAlpha * tipAlpha) * 255.0f));
         if (mMaskBitmap.length >= 1){
-            Bitmap maskLayer = this.mMaskBitmap[0];
-            this.mPathLayerCanvas.drawBitmap(maskLayer, (float) (-this.mMaskPadding), (float) (-this.mMaskPadding), this.mDstInPaint);
+            Bitmap maskLayer = mMaskBitmap[0];
+            mPathLayerCanvas.drawBitmap(maskLayer, (float) (-mMaskPadding), (float) (-mMaskPadding), mDstInPaint);
         }
 
     }
