@@ -67,6 +67,8 @@ public class PaintView extends View {
     private Matrix mMatrix;
     private float mDeviceAngle;
     private PointF mOldPt;
+    private boolean mIsJitterColor;
+
 
     private static interface OnTouchHandler {
         boolean onTouchEvent(int i, MotionEvent motionEvent);
@@ -137,6 +139,12 @@ public class PaintView extends View {
         while (i < this.mMaskBitmap.length) {
             this.mMaskBitmap[i] = decodeScaledExpandResource(getResources(), brush.maskImageIdArray[i], (int) this.mPathWidth, (int) this.mPathWidth, this.mMaskPadding);
             i++;
+        }
+
+        if (((double) brush.jitterHue) == 0.0d && ((double) brush.jitterSaturation) == 0.0d && ((double) brush.jitterBrightness) == 0.0d) {
+            mIsJitterColor = false;
+        } else {
+            mIsJitterColor = true;
         }
 
     }
@@ -284,8 +292,15 @@ public class PaintView extends View {
 
     private void fillBrushWithColor(Brush brush, float x, float y, float tipAlpha) {
         //int color = mLineColor;
-        int color = Color.argb((int) (mDrawingAlpha * tipAlpha * 255.0f), Color.red(mLineColor), Color.green(mLineColor), Color.blue(mLineColor));
-        this.mPathLayerCanvas.drawColor(color, PorterDuff.Mode.SRC);
+        int color;
+        if ((!this.mIsJitterColor) || brush.useFirstJitter) {
+            color = Color.argb((int) ((mDrawingAlpha * brush.colorPatchAlpha * tipAlpha) * 255.0f), Color.red(mLineColor), Color.green(mLineColor), Color.blue(mLineColor));
+        } else {
+            int jitterColor = jitterColor(this.mLineColor);
+            color = Color.argb((int) (mDrawingAlpha * tipAlpha * 255.0f), Color.red(jitterColor), Color.green(jitterColor), Color.blue(jitterColor));
+        }
+
+        mPathLayerCanvas.drawColor(color, PorterDuff.Mode.SRC);
 
     }
 
@@ -334,6 +349,20 @@ public class PaintView extends View {
             angle += ((float) Math.atan2((double) (curY - oldY), (double) (curX - oldX))) - 1.5707964f;
         }
         return brush.angleJitter > 0.0f ? angle + ((this.mRandom.nextFloat() - 0.5f) * 6.2831855f) * brush.angleJitter : angle;
+    }
+
+    private int jitterColor(int color) {
+        if (!mIsJitterColor) {
+            return color;
+        }
+        float[] hsv = new float[3];
+        Color.colorToHSV(color, hsv);
+        float hue = hsv[0];
+        float saturation = hsv[1];
+        hsv[0] = ((hue + (((mRandom.nextFloat() - 0.5f) * 360.0f) * mBrush.jitterHue)) + 360.0f) % 360.0f;
+        hsv[1] = saturation + (mRandom.nextFloat() - 0.5f) * mBrush.jitterSaturation;
+        hsv[2] = hsv[2] + (mRandom.nextFloat() - 0.5f) * mBrush.jitterBrightness;
+        return Color.HSVToColor(hsv);
     }
 
 
