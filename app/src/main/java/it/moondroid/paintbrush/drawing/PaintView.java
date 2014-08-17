@@ -6,7 +6,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.Matrix;
 import android.graphics.Paint;
+import android.graphics.PointF;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
@@ -62,6 +64,9 @@ public class PaintView extends View {
     private int mMaskPadding;
 
     private Random mRandom;
+    private Matrix mMatrix;
+    private float mDeviceAngle;
+    private PointF mOldPt;
 
     private static interface OnTouchHandler {
         boolean onTouchEvent(int i, MotionEvent motionEvent);
@@ -108,6 +113,9 @@ public class PaintView extends View {
         this.mTouchResampler = new MyTouchDistanceResampler();
 
         mRandom = new Random();
+        mMatrix = new Matrix();
+        mOldPt = new PointF();
+
     }
 
     public void setBrush(Brush brush) {
@@ -244,6 +252,9 @@ public class PaintView extends View {
     }
 
     private void moveToAction(float x, float y, float level) {
+
+        mOldPt.set(x, y);
+
         beforeLine(x, y);
     }
 
@@ -265,8 +276,10 @@ public class PaintView extends View {
         }
 
         fillBrushWithColor(brush, drawX, drawY, tipAlpha);
-        maskBrushWithAngle(brush, 0.0f, tipAlpha);
+        maskBrushWithAngle(brush, getBrushSpotAngle(brush, this.mOldPt.x, this.mOldPt.y, x, y), tipAlpha);
         drawBrushWithScale(drawX, drawY, tipScale);
+
+        mOldPt.set(x, y);
     }
 
     private void fillBrushWithColor(Brush brush, float x, float y, float tipAlpha) {
@@ -279,10 +292,19 @@ public class PaintView extends View {
     private void maskBrushWithAngle(Brush brush, float angle, float tipAlpha) {
 
         mDstInPaint.setAlpha((int) ((tipAlpha * tipAlpha) * 255.0f));
+        Bitmap maskLayer = EMPTY_BITMAP;
         if (mMaskBitmap.length >= 1){
-            Bitmap maskLayer = mMaskBitmap[0];
+            maskLayer = mMaskBitmap[0];
+        }
+
+        if (angle != 0.0f) {
+            this.mMatrix.setTranslate((float) (-mMaskPadding), (float) (-mMaskPadding));
+            this.mMatrix.postRotate((float) Math.toDegrees((double) angle), this.mPathWidthHalf, this.mPathWidthHalf);
+            mPathLayerCanvas.drawBitmap(maskLayer, this.mMatrix, mDstInPaint);
+        }else{
             mPathLayerCanvas.drawBitmap(maskLayer, (float) (-mMaskPadding), (float) (-mMaskPadding), mDstInPaint);
         }
+
 
     }
 
@@ -303,6 +325,16 @@ public class PaintView extends View {
 
     }
 
+    private float getBrushSpotAngle(Brush brush, float oldX, float oldY, float curX, float curY) {
+        float angle = brush.angle * 6.2831855f;
+        if (brush.useDeviceAngle) {
+            angle += this.mDeviceAngle;
+        }
+        if (brush.useFlowingAngle) {
+            angle += ((float) Math.atan2((double) (curY - oldY), (double) (curX - oldX))) - 1.5707964f;
+        }
+        return brush.angleJitter > 0.0f ? angle + ((this.mRandom.nextFloat() - 0.5f) * 6.2831855f) * brush.angleJitter : angle;
+    }
 
 
     private class MyTouchDistanceResampler extends TouchDistanceResampler {
