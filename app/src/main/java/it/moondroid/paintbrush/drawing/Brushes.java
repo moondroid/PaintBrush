@@ -21,7 +21,7 @@ public class Brushes {
         BRUSH_STYLES = new int[]{R.style.Brush_Bamboo1, R.style.Brush_Bamboo2, R.style.Brush_AirBrush,
                 R.style.Brush_Pen, R.style.Brush_Calligraphy, R.style.Brush_SoftPencil,
                 R.style.Brush_AirBrush, R.style.Brush_FeltPen, R.style.Brush_WaterColor,
-                R.style.Brush_Pastel, R.style.Brush_Creyon, R.style.Brush_Sponge};
+                R.style.Brush_Pastel, R.style.Brush_Creyon, R.style.Brush_Sponge, R.style.Brush_Flowers};
     }
 
     public static List<Brush> get(Context context, int type) {
