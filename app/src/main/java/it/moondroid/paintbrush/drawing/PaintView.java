@@ -13,6 +13,8 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.graphics.RectF;
+import android.graphics.Shader;
+import android.graphics.drawable.BitmapDrawable;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.util.FloatMath;
@@ -21,6 +23,8 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import java.util.Random;
+
+import it.moondroid.paintbrush.R;
 
 /**
  * Created by marco.granatiero on 07/08/2014.
@@ -47,6 +51,10 @@ public class PaintView extends View {
     private float mPathWidthHalf;
     private Bitmap mMergedLayer;
     private Canvas mMergedLayerCanvas;
+    private Bitmap mTextureLayer;
+    private Canvas mTextureLayerCanvas;
+    private BitmapDrawable mTextureDrawable;
+
     private RectF mLineDirtyRect;
 
     private Paint mNormalPaint;
@@ -78,6 +86,9 @@ public class PaintView extends View {
     public PaintView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
+        this.mTextureDrawable = new BitmapDrawable(getResources(), BitmapFactory.decodeResource(getResources(), R.drawable.texture01));
+        this.mTextureDrawable.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
+
         mNormalPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
         mSrcPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
         mDstInPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
@@ -92,6 +103,7 @@ public class PaintView extends View {
         mDrawingLayerCanvas = new Canvas();
         mPathLayerCanvas = new Canvas();
         this.mMergedLayerCanvas = new Canvas();
+        this.mTextureLayerCanvas = new Canvas();
 
         mOnDrawCanvasRect = new Rect();
         mLineDirtyRect = new RectF();
@@ -207,6 +219,10 @@ public class PaintView extends View {
         mDrawingLayerCanvas.setBitmap(mDrawingLayer);
         this.mMergedLayer = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         this.mMergedLayerCanvas.setBitmap(this.mMergedLayer);
+        this.mTextureLayer = Bitmap.createBitmap(w, h, Bitmap.Config.ALPHA_8);
+        this.mTextureLayerCanvas.setBitmap(this.mTextureLayer);
+        this.mTextureDrawable.setBounds(0, 0, w, h);
+        this.mTextureDrawable.draw(this.mTextureLayerCanvas);
 
     }
 
@@ -285,6 +301,9 @@ public class PaintView extends View {
 
         fillBrushWithColor(brush, drawX, drawY, tipAlpha);
         maskBrushWithAngle(brush, getBrushSpotAngle(brush, this.mOldPt.x, this.mOldPt.y, x, y), tipAlpha);
+        if (brush.textureDepth > 0.0f) {
+            textureBrush(brush, drawX - this.mPathWidthHalf, drawY - this.mPathWidthHalf);
+        }
         drawBrushWithScale(drawX, drawY, tipScale);
 
         mOldPt.set(x, y);
@@ -365,6 +384,10 @@ public class PaintView extends View {
         return Color.HSVToColor(hsv);
     }
 
+    private void textureBrush(Brush brush, float x, float y) {
+        this.mDstOutPaint.setAlpha((int) (brush.textureDepth * 255.0f));
+        this.mPathLayerCanvas.drawBitmap(this.mTextureLayer, -x, -y, this.mDstOutPaint);
+    }
 
     private class MyTouchDistanceResampler extends TouchDistanceResampler {
         private float mLastDrawDistance;
