@@ -6,9 +6,11 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 
+import it.moondroid.paintbrush.dialogs.HSVColorPickerDialog;
 import it.moondroid.paintbrush.drawing.Brush;
 import it.moondroid.paintbrush.drawing.Brushes;
 import it.moondroid.paintbrush.drawing.PaintView;
@@ -25,6 +27,8 @@ public class MainActivity extends Activity {
 
     private ImageView mFirstBrushButton;
 
+    private int mDrawingColor = 0xFF4488CC; //default color
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -37,7 +41,7 @@ public class MainActivity extends Activity {
         mFirstBrushButton.setImageResource(brush.iconId);
 
         mPaintView.setBrush(brush);
-        mPaintView.setDrawingColor(Color.BLACK);
+        setColor(mDrawingColor);
         mPaintView.setDrawingBgColor(Color.WHITE);
 
         this.mSizeSeekBar = (PopupSeekBar) findViewById(R.id.sizePopupSeekbar);
@@ -80,6 +84,23 @@ public class MainActivity extends Activity {
 
         setScaledSize(mPaintView.getDrawingScaledSize());
         setOpacity(0.5f);
+
+        findViewById(R.id.currentColorButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                HSVColorPickerDialog cpd = new HSVColorPickerDialog( MainActivity.this, mDrawingColor, new HSVColorPickerDialog.OnColorSelectedListener() {
+                    @Override
+                    public void colorSelected(Integer color) {
+                        if(color!=null){
+                            setColor(color);
+                            mDrawingColor = color;
+                        }
+                    }
+                });
+                cpd.setTitle(getResources().getString(R.string.dialog_color_title));
+                cpd.show();
+            }
+        });
     }
 
 
@@ -92,6 +113,11 @@ public class MainActivity extends Activity {
         this.mOpacitySeekBar.setProgress((int) (opacity*100.0f));
         //this.mColorButton.setColor(getColorWithAlpha(this.mPaintView.getDrawingColor(), opacity));
         this.mPaintView.setDrawingAlpha(opacity);
+    }
+
+    private void setColor(int color) {
+        //this.mColorButton.setColor(getColorWithAlpha(color, this.mPaintView.getDrawingAlpha()));
+        this.mPaintView.setDrawingColor(color);
     }
 
     @Override
