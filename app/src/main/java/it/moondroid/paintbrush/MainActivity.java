@@ -41,7 +41,7 @@ public class MainActivity extends Activity {
         mFirstBrushButton.setImageResource(brush.iconId);
 
         mPaintView.setBrush(brush);
-        setColor(mDrawingColor);
+        setColor(brush.defaultColor);
         mPaintView.setDrawingBgColor(Color.WHITE);
 
         this.mSizeSeekBar = (PopupSeekBar) findViewById(R.id.sizePopupSeekbar);
@@ -93,7 +93,6 @@ public class MainActivity extends Activity {
                     public void colorSelected(Integer color) {
                         if(color!=null){
                             setColor(color);
-                            mDrawingColor = color;
                         }
                     }
                 });
@@ -118,6 +117,7 @@ public class MainActivity extends Activity {
     private void setColor(int color) {
         //this.mColorButton.setColor(getColorWithAlpha(color, this.mPaintView.getDrawingAlpha()));
         this.mPaintView.setDrawingColor(color);
+        mDrawingColor = color;
     }
 
     @Override
@@ -149,6 +149,7 @@ public class MainActivity extends Activity {
             if(mPaintView!=null){
                 mPaintView.setBrush(brushes[id]);
                 mFirstBrushButton.setImageResource(brushes[id].iconId);
+                setColor(brushes[id].defaultColor);
                 return true;
             }
         }
