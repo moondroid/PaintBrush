@@ -2,6 +2,7 @@ package it.moondroid.paintbrush;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.Menu;
@@ -28,6 +29,9 @@ public class MainActivity extends Activity {
     private ImageView mFirstBrushButton;
 
     private int mDrawingColor = 0xFF4488CC; //default color
+    private int mCurrentBrushId = 0; //default brush
+
+    private static final int REQUEST_BRUSH_SELECT = 3;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,7 +41,7 @@ public class MainActivity extends Activity {
         mPaintView = (PaintView) findViewById(R.id.paint_view);
         mFirstBrushButton = (ImageView)findViewById(R.id.firstBrushButton);
 
-        Brush brush = Brushes.get(getApplicationContext())[0];
+        Brush brush = Brushes.get(getApplicationContext())[mCurrentBrushId];
         mFirstBrushButton.setImageResource(brush.iconId);
 
         mPaintView.setBrush(brush);
@@ -100,6 +104,16 @@ public class MainActivity extends Activity {
                 cpd.show();
             }
         });
+
+        findViewById(R.id.firstBrushButton).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent brushSelect = new Intent(MainActivity.this, BrushSelectActivity.class);
+                brushSelect.putExtra(PaintBrushApp.EXTRA_BRUSH_ID, mCurrentBrushId);
+                brushSelect.putExtra(PaintBrushApp.EXTRA_BRUSH_TYPE, 0);
+                startActivityForResult(brushSelect, REQUEST_BRUSH_SELECT);
+            }
+        });
     }
 
 
@@ -120,17 +134,22 @@ public class MainActivity extends Activity {
         mDrawingColor = color;
     }
 
+    private void setBrush(int brushId){
+        Brush[] brushes = Brushes.get(getApplicationContext());
+        if(brushId>=0 && brushId<brushes.length){
+            if(mPaintView!=null){
+                mPaintView.setBrush(brushes[brushId]);
+                mFirstBrushButton.setImageResource(brushes[brushId].iconId);
+                setColor(brushes[brushId].defaultColor);
+                mCurrentBrushId = brushId;
+            }
+        }
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         //getMenuInflater().inflate(R.menu.main, menu);
-
-        int i = 0;
-        for (Brush brush : Brushes.get(getApplicationContext())){
-            menu.add(Menu.NONE, i, Menu.NONE, brush.name);
-            i++;
-        }
-
 
         return true;
     }
@@ -140,23 +159,25 @@ public class MainActivity extends Activity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-//        if (id == R.id.action_settings) {
-//            return true;
-//        }
-        Brush[] brushes = Brushes.get(getApplicationContext());
-        if(id>=0 && id<brushes.length){
-            if(mPaintView!=null){
-                mPaintView.setBrush(brushes[id]);
-                mFirstBrushButton.setImageResource(brushes[id].iconId);
-                setColor(brushes[id].defaultColor);
-                return true;
-            }
-        }
 
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if (resultCode != 0) {
+            switch (requestCode) {
+                case REQUEST_BRUSH_SELECT:
+                    int brushId = data.getIntExtra(PaintBrushApp.EXTRA_BRUSH_ID, 0);
+                    setBrush(brushId);
+                    break;
+
+                default:
+                    break;
+            }
+
+        }
+    }
 
     private class MySizePopupWindow extends SizePopupWindow {
 

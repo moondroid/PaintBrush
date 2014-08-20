@@ -11,6 +11,9 @@ public class PaintBrushApp extends Application {
 
     public static final String TAG = "PaintBrush";
 
+    public static final String EXTRA_BRUSH_ID = "brushId";
+    public static final String EXTRA_BRUSH_TYPE = "brushType";
+
     public void onCreate() {
         super.onCreate();
         Brushes.loadBrushList(getApplicationContext());

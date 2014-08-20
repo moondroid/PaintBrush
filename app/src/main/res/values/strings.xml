@@ -8,5 +8,5 @@
     <string name="size">Size</string>
     <string name="opacity">Opacity</string>
     <string name="dialog_color_title">Pick a color</string>
-
+    <string name="dialog_brush_title">Pick a brush</string>
 </resources>

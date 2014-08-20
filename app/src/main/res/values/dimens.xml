@@ -20,4 +20,10 @@
     <dimen name="popup_width">161.32999dip</dimen>
     <dimen name="popup_height">161.32999dip</dimen>
 
+    <dimen name="brushSelectItemWidth">150.0dip</dimen>
+    <dimen name="brushSelectItemTextSize">14.0sp</dimen>
+    <dimen name="brushSelectItemDrawablePadding">4.0dip</dimen>
+    <dimen name="brushSelectItemPaddingTopBottom">4.669983dip</dimen>
+
+
 </resources>
