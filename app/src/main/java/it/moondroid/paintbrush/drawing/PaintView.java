@@ -54,6 +54,8 @@ public class PaintView extends View {
     private Bitmap mTextureLayer;
     private Canvas mTextureLayerCanvas;
     private BitmapDrawable mTextureDrawable;
+    private Bitmap mTempPathLayer;
+    private Canvas mTempPathLayerCanvas;
 
     private RectF mLineDirtyRect;
     private RectF mDirtyRect;
@@ -107,6 +109,7 @@ public class PaintView extends View {
         mPathLayerCanvas = new Canvas();
         this.mMergedLayerCanvas = new Canvas();
         this.mTextureLayerCanvas = new Canvas();
+        this.mTempPathLayerCanvas = new Canvas();
 
         mOnDrawCanvasRect = new Rect();
         mLineDirtyRect = new RectF();
@@ -162,6 +165,9 @@ public class PaintView extends View {
         } else {
             mIsJitterColor = true;
         }
+
+        this.mTempPathLayer = Bitmap.createBitmap((int) this.mPathWidth, (int) this.mPathWidth, Bitmap.Config.ARGB_8888);
+        this.mTempPathLayerCanvas.setBitmap(this.mTempPathLayer);
 
     }
 
@@ -320,6 +326,9 @@ public class PaintView extends View {
         }
 
         fillBrushWithColor(brush, drawX, drawY, tipAlpha);
+        if (brush.useSmudging) {
+            smudgingBrush(brush, this.mOldPt.x - this.mPathWidthHalf, this.mOldPt.y - this.mPathWidthHalf, tipAlpha);
+        }
         maskBrushWithAngle(brush, getBrushSpotAngle(brush, this.mOldPt.x, this.mOldPt.y, x, y), tipAlpha);
         if (brush.textureDepth > 0.0f) {
             textureBrush(brush, drawX - this.mPathWidthHalf, drawY - this.mPathWidthHalf);
@@ -459,6 +468,17 @@ public class PaintView extends View {
     private void textureBrush(Brush brush, float x, float y) {
         this.mDstOutPaint.setAlpha((int) (brush.textureDepth * 255.0f));
         this.mPathLayerCanvas.drawBitmap(this.mTextureLayer, -x, -y, this.mDstOutPaint);
+    }
+
+    private void smudgingBrush(Brush brush, float x, float y, float tipAlpha) {
+        x = -x;
+        y = -y;
+        this.mTempPathLayerCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.SRC);
+        this.mTempPathLayerCanvas.drawBitmap(this.mMergedLayer, x, y, null);
+        this.mNormalPaint.setAlpha((int) (this.mDrawingAlpha * 255.0f));
+        this.mTempPathLayerCanvas.drawBitmap(this.mDrawingLayer, x, y, this.mNormalPaint);
+        this.mNormalPaint.setAlpha((int) ((brush.smudgingPatchAlpha * tipAlpha) * 255.0f));
+        this.mPathLayerCanvas.drawBitmap(this.mTempPathLayer, 0.0f, 0.0f, this.mNormalPaint);
     }
 
     private class MyTouchDistanceResampler extends TouchDistanceResampler {
