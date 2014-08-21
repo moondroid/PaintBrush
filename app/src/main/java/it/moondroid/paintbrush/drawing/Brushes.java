@@ -21,6 +21,7 @@ public class Brushes {
         BRUSH_STYLES = new int[]{R.style.Brush_Bamboo1, R.style.Brush_Bamboo2, R.style.Brush_AirBrush,
                 R.style.Brush_Pen, R.style.Brush_Calligraphy, R.style.Brush_HardPencil,
                 R.style.Brush_SoftPencil, R.style.Brush_InkPen, R.style.Brush_BallpointPen,
+                R.style.Brush_HardEraser, R.style.Brush_SoftEraser,
                 R.style.Brush_AirBrush, R.style.Brush_Oil, R.style.Brush_FeltPen,
                 R.style.Brush_WaterColor, R.style.Brush_OilPastel, R.style.Brush_Pastel,
                 R.style.Brush_HardPastel, R.style.Brush_Creyon, R.style.Brush_InkSpot,

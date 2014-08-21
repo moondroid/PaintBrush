@@ -34,7 +34,8 @@
             <ImageView
                 android:id="@+id/secondBrushButton"
                 android:src="@drawable/main_brush_icon_08"
-                style="@style/RecentBrushSmallButton" />
+                style="@style/RecentBrushSmallButton"
+                android:visibility="gone"/>
         </LinearLayout>
 
         <LinearLayout
