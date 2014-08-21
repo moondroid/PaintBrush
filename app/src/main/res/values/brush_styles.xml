@@ -843,7 +843,7 @@
         <item name="useFirstJitter">false</item>
         <item name="useFlowingAngle">false</item>
         <item name="useSmudging">true</item>
-        <item name="defaultColor">#ff8400fc</item>
+        <item name="defaultColor">#00ffffff</item>
     </style>
     <style name="Brush_InkSpot">
         <item name="angle">0.0</item>
