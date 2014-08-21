@@ -56,6 +56,7 @@ public class PaintView extends View {
     private BitmapDrawable mTextureDrawable;
 
     private RectF mLineDirtyRect;
+    private RectF mDirtyRect;
 
     private Paint mNormalPaint;
     private Paint mSrcPaint;
@@ -77,6 +78,8 @@ public class PaintView extends View {
     private PointF mOldPt;
     private boolean mIsJitterColor;
 
+    private boolean mDrawingLayerNeedDrawn;
+    private boolean mIsBatchDraw;
 
     private static interface OnTouchHandler {
         boolean onTouchEvent(int i, MotionEvent motionEvent);
@@ -107,6 +110,7 @@ public class PaintView extends View {
 
         mOnDrawCanvasRect = new Rect();
         mLineDirtyRect = new RectF();
+        mDirtyRect = new RectF();
 
         mDrawingAlpha = 1.0f;
 
@@ -228,6 +232,7 @@ public class PaintView extends View {
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
+        this.mIsBatchDraw = false;
 
         if (this.mBrush == null) {
             return super.onTouchEvent(event);
@@ -261,17 +266,32 @@ public class PaintView extends View {
         if (rect == null) {
             canvas.saveLayer(null, null, Canvas.HAS_ALPHA_LAYER_SAVE_FLAG);
         } else {
-            canvas.saveLayer((float) (rect.left - 1), (float) (this.mOnDrawCanvasRect.top - 1), (float) (this.mOnDrawCanvasRect.right + 1), (float) (this.mOnDrawCanvasRect.bottom + 1), null, Canvas.HAS_ALPHA_LAYER_SAVE_FLAG);
+            canvas.saveLayer((float) (rect.left - 1), (float) (this.mOnDrawCanvasRect.top - 1),
+                    (float) (this.mOnDrawCanvasRect.right + 1), (float) (this.mOnDrawCanvasRect.bottom + 1),
+                    null, Canvas.HAS_ALPHA_LAYER_SAVE_FLAG);
         }
 
-        canvas.drawBitmap(mDrawingLayer, 0.0f, 0.0f, mNormalPaint);
+        canvas.drawBitmap(this.mMergedLayer, 0.0f, 0.0f, this.mSrcPaint);
 
-        canvas.restore();
+        if ((!this.mDrawingLayerNeedDrawn)) {
+            canvas.restore();
+        }else {
+            Paint p;
+            p = !(this.mBrush.isEraser) ? this.mNormalPaint : this.mDstOutPaint;
+            p.setAlpha((int) (this.mDrawingAlpha * 255.0f));
+            canvas.drawBitmap(mDrawingLayer, 0.0f, 0.0f, p);
+            canvas.restore();
+        }
+
+
+
+
 
     }
 
     private void moveToThread(float x, float y) {
         float level = 1.0f;
+        resetDrawingDirtyRect();
         moveToAction(x, y, level);
     }
 
@@ -307,16 +327,19 @@ public class PaintView extends View {
         drawBrushWithScale(drawX, drawY, tipScale);
 
         mOldPt.set(x, y);
+        mDirtyRect.union(drawX - this.mPathWidthHalf, drawY - this.mPathWidthHalf,
+                this.mPathWidthHalf + drawX, this.mPathWidthHalf + drawY);
+
     }
 
     private void fillBrushWithColor(Brush brush, float x, float y, float tipAlpha) {
         //int color = mLineColor;
         int color;
         if ((!this.mIsJitterColor) || brush.useFirstJitter) {
-            color = Color.argb((int) ((mDrawingAlpha * brush.colorPatchAlpha * tipAlpha) * 255.0f), Color.red(mLineColor), Color.green(mLineColor), Color.blue(mLineColor));
+            color = Color.argb((int) ((brush.colorPatchAlpha * tipAlpha) * 255.0f), Color.red(mLineColor), Color.green(mLineColor), Color.blue(mLineColor));
         } else {
             int jitterColor = jitterColor(this.mLineColor);
-            color = Color.argb((int) (mDrawingAlpha * tipAlpha * 255.0f), Color.red(jitterColor), Color.green(jitterColor), Color.blue(jitterColor));
+            color = Color.argb((int) (tipAlpha * 255.0f), Color.red(jitterColor), Color.green(jitterColor), Color.blue(jitterColor));
         }
 
         mPathLayerCanvas.drawColor(color, PorterDuff.Mode.SRC);
@@ -338,6 +361,57 @@ public class PaintView extends View {
         }
 
 
+    }
+
+    private void destLineThread() {
+        if (this.mBrush.isEraser) {
+            mergeWithAlpha(this.mDrawingAlpha, this.mDstOutPaint, this.mLineDirtyRect);
+        } else {
+            mergeWithAlpha(this.mDrawingAlpha, this.mNormalPaint, this.mLineDirtyRect);
+        }
+    }
+
+    private void mergeWithAlpha(float alpha, Paint paint, RectF rectF) {
+        paint.setAlpha((int) (255.0f * alpha));
+        this.mMergedLayerCanvas.save();
+        this.mMergedLayerCanvas.clipRect(rectF);
+        this.mMergedLayerCanvas.drawBitmap(this.mDrawingLayer, 0.0f, 0.0f, paint);
+        this.mMergedLayerCanvas.restore();
+        clearDrawingLayer(rectF);
+        if (!(this.mIsBatchDraw)) {
+            Rect rect = new Rect();
+            rectF.round(rect);
+            invalidate(rect);
+        }
+
+    }
+
+    private void clearDrawingLayer(RectF rectF) {
+        this.mDrawingLayerCanvas.save();
+        this.mDrawingLayerCanvas.clipRect(rectF);
+        this.mDrawingLayerCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.SRC);
+        this.mDrawingLayerCanvas.restore();
+        this.mDrawingLayerNeedDrawn = false;
+    }
+
+    private void openLine() {
+        this.mDirtyRect.set(this.mOldPt.x - this.mPathWidthHalf,
+                this.mOldPt.y - this.mPathWidthHalf, this.mOldPt.x + this.mPathWidthHalf,
+                this.mOldPt.y + this.mPathWidthHalf);
+    }
+
+    private void closeLine() {
+        this.mLineDirtyRect.union(this.mDirtyRect);
+        if (!(this.mIsBatchDraw)) {
+            Rect rect = new Rect();
+            mDirtyRect.round(rect);
+            invalidate(rect);
+        }
+    }
+
+    private void resetDrawingDirtyRect() {
+        this.mLineDirtyRect.setEmpty();
+        this.mDrawingLayerNeedDrawn = true;
     }
 
     private void drawBrushWithScale(float x, float y, float tipScale) {
@@ -403,6 +477,7 @@ public class PaintView extends View {
             Log.d("PaintView", "onTouchMove");
             Brush brush = PaintView.this.mBrush;
 
+            openLine();
             while (getXYVAtDistance(this.mLastDrawDistance, this.mTempXYV)) {
                 float tipSpeedScale;
                 float tipSpeedAlpha;
@@ -425,13 +500,14 @@ public class PaintView extends View {
                 }
                 this.mLastDrawDistance += PaintView.this.mSpacing * tipSpeedScale;
             }
-
+            closeLine();
         }
 
         @Override
         protected void onTouchUp() {
             Log.d("PaintView", "onTouchUp");
-            //PaintView.this.destLineThread();
+            PaintView.this.destLineThread();
+
         }
     }
 
