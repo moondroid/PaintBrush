@@ -24,7 +24,9 @@ public class Brushes {
                 R.style.Brush_HardEraser, R.style.Brush_SoftEraser,
                 R.style.Brush_AirBrush, R.style.Brush_Oil, R.style.Brush_FeltPen,
                 R.style.Brush_WaterColor, R.style.Brush_OilPastel, R.style.Brush_Pastel,
-                R.style.Brush_HardPastel, R.style.Brush_Creyon, R.style.Brush_InkSpot,
+                R.style.Brush_HardPastel, R.style.Brush_Creyon,
+                R.style.Brush_Knife1, R.style.Brush_CombKnife, R.style.Brush_ColorlessOil,
+                R.style.Brush_Finger, R.style.Brush_InkSpot,
                 R.style.Brush_Flowers, R.style.Brush_Fish, R.style.Brush_Sponge};
     }
 
