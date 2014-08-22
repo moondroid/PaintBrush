@@ -221,6 +221,25 @@ public class PaintView extends View {
         return this.mDrawingAlpha;
     }
 
+
+    public boolean isClear() {
+        //return (this.mBitmapHistoryManager.isEmpty() && this.mBackgroundBitmap == null) ? true : false;
+        return false;
+    }
+
+    public void clear() {
+        setDrawingForegroundBitmap(null);
+        //setDrawingBackgroundBitmap(null);
+    }
+
+    public void setDrawingForegroundBitmap(Bitmap bitmap) {
+        this.mDrawingLayerCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.SRC);
+        this.mMergedLayerCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.SRC);
+
+        invalidate();
+    }
+
+
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);

@@ -1,7 +1,9 @@
 package it.moondroid.paintbrush;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -10,6 +12,9 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+
+import com.joanzapata.android.iconify.IconDrawable;
+import com.joanzapata.android.iconify.Iconify;
 
 import it.moondroid.paintbrush.dialogs.HSVColorPickerDialog;
 import it.moondroid.paintbrush.drawing.Brush;
@@ -149,8 +154,12 @@ public class MainActivity extends Activity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        //getMenuInflater().inflate(R.menu.main, menu);
+        getMenuInflater().inflate(R.menu.main, menu);
 
+        menu.findItem(R.id.action_delete).setIcon(
+                new IconDrawable(this, Iconify.IconValue.fa_trash_o)
+                        .color(Color.WHITE)
+                        .actionBarSize());
         return true;
     }
 
@@ -159,6 +168,27 @@ public class MainActivity extends Activity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
+
+        switch (item.getItemId()){
+            case R.id.action_delete:
+                if (!this.mPaintView.isClear()) {
+                    AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setMessage(R.string.delete_confirm_message)
+                            .setPositiveButton(R.string.delete_confirm_positive, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    mPaintView.clear();
+                                }
+                            })
+                            .setNegativeButton(R.string.delete_confirm_negative, new DialogInterface.OnClickListener() {
+                                public void onClick(DialogInterface dialog, int id) {
+                                    // User cancelled the dialog
+                                }
+                            });
+                    builder.create().show();
+                }
+                return true;
+
+        }
 
         return super.onOptionsItemSelected(item);
     }
