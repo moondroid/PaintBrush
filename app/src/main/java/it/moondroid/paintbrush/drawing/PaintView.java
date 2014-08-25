@@ -147,6 +147,8 @@ public class PaintView extends View {
 
         mSpacing = brush.spacing * brush.size;
 
+        releaseBrushSizeBitmaps();
+
         mPathLayer = Bitmap.createBitmap((int) mPathWidth, (int) mPathWidth, Bitmap.Config.ARGB_8888);
         mPathLayerCanvas.setBitmap(this.mPathLayer);
 
@@ -243,6 +245,8 @@ public class PaintView extends View {
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {
         super.onSizeChanged(w, h, oldw, oldh);
+
+        releaseViewSizeBitmaps();
 
         mDrawingLayer = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);
         mDrawingLayerCanvas.setBitmap(mDrawingLayer);
@@ -498,6 +502,59 @@ public class PaintView extends View {
         this.mTempPathLayerCanvas.drawBitmap(this.mDrawingLayer, x, y, this.mNormalPaint);
         this.mNormalPaint.setAlpha((int) ((brush.smudgingPatchAlpha * tipAlpha) * 255.0f));
         this.mPathLayerCanvas.drawBitmap(this.mTempPathLayer, 0.0f, 0.0f, this.mNormalPaint);
+    }
+
+    @Override
+    protected void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        release();
+    }
+
+    public void release() {
+        releaseViewSizeBitmaps();
+        releaseBrushSizeBitmaps();
+    }
+
+    private void releaseBrushSizeBitmaps() {
+        this.mPathLayerCanvas.setBitmap(EMPTY_BITMAP);
+        if (this.mPathLayer != null) {
+            this.mPathLayer.recycle();
+            this.mPathLayer = null;
+        }
+        this.mTempPathLayerCanvas.setBitmap(EMPTY_BITMAP);
+        if (this.mTempPathLayer != null) {
+            this.mTempPathLayer.recycle();
+            this.mTempPathLayer = null;
+        }
+        if (this.mMaskBitmap != null) {
+            int i = 0;
+            while (i < this.mMaskBitmap.length) {
+                if (this.mMaskBitmap[i] != null) {
+                    this.mMaskBitmap[i].recycle();
+                    this.mMaskBitmap[i] = null;
+                }
+                i++;
+            }
+            this.mMaskBitmap = null;
+        }
+    }
+
+    private void releaseViewSizeBitmaps() {
+        this.mMergedLayerCanvas.setBitmap(EMPTY_BITMAP);
+        if (this.mMergedLayer != null) {
+            this.mMergedLayer.recycle();
+            this.mMergedLayer = null;
+        }
+        this.mDrawingLayerCanvas.setBitmap(EMPTY_BITMAP);
+        if (this.mDrawingLayer != null) {
+            this.mDrawingLayer.recycle();
+            this.mDrawingLayer = null;
+        }
+        this.mTextureLayerCanvas.setBitmap(EMPTY_BITMAP);
+        if (this.mTextureLayer != null) {
+            this.mTextureLayer.recycle();
+            this.mTextureLayer = null;
+        }
     }
 
     private class MyTouchDistanceResampler extends TouchDistanceResampler {
