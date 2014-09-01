@@ -50,6 +50,7 @@
         <attr name="useFirstJitter" format="boolean" />
         <attr name="useFlowingAngle" format="boolean" />
         <attr name="useSmudging" format="boolean" />
+        <attr name="useSingleLayerStroke" format="boolean" />
         <attr name="useThread" format="boolean" />
         <attr name="defaultColor" format="color" />
         <attr name="maskDrawable" format="reference" />

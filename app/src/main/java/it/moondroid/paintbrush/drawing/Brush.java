@@ -58,6 +58,7 @@ public class Brush {
     public boolean useFirstJitter;
     public boolean useFlowingAngle;
     public boolean useSmudging;
+    public boolean useSingleLayerStroke;
 
     static {
         BRUSH_MASK_IMAGE_ARRAY_STYLEABLE = new int[]{R.styleable.Brush_maskImageArray0,
@@ -117,6 +118,7 @@ public class Brush {
         this.useFirstJitter = a.getBoolean(R.styleable.Brush_useFirstJitter, false);
         this.useFlowingAngle = a.getBoolean(R.styleable.Brush_useFlowingAngle, false);
         this.useSmudging = a.getBoolean(R.styleable.Brush_useSmudging, false);
+        this.useSingleLayerStroke = a.getBoolean(R.styleable.Brush_useSingleLayerStroke, false);
         this.defaultColor = a.getColor(R.styleable.Brush_defaultColor, 0);
     }
 

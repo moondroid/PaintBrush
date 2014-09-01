@@ -300,21 +300,27 @@ public class PaintView extends View {
                     null, Canvas.HAS_ALPHA_LAYER_SAVE_FLAG);
         }
 
-        canvas.drawBitmap(this.mMergedLayer, 0.0f, 0.0f, this.mSrcPaint);
+        if(mBrush.useSingleLayerStroke){
+            canvas.drawBitmap(this.mMergedLayer, 0.0f, 0.0f, this.mSrcPaint);
+            if ((!this.mDrawingLayerNeedDrawn)) {
+                canvas.restore();
+            }else {
+                Paint p;
+                p = !(this.mBrush.isEraser) ? this.mNormalPaint : this.mDstOutPaint;
+                p.setAlpha((int) (this.mDrawingAlpha * 255.0f));
+                canvas.drawBitmap(mDrawingLayer, 0.0f, 0.0f, p);
+                canvas.restore();
+            }
+        }else{
 
-        if ((!this.mDrawingLayerNeedDrawn)) {
-            canvas.restore();
-        }else {
-            Paint p;
-            p = !(this.mBrush.isEraser) ? this.mNormalPaint : this.mDstOutPaint;
-            p.setAlpha((int) (this.mDrawingAlpha * 255.0f));
-            canvas.drawBitmap(mDrawingLayer, 0.0f, 0.0f, p);
+            canvas.drawBitmap(this.mMergedLayer, 0.0f, 0.0f, this.mSrcPaint);
+            if ((this.mDrawingLayerNeedDrawn)) {
+                Paint p;
+                p = !(this.mBrush.isEraser) ? this.mNormalPaint : this.mDstOutPaint;
+                canvas.drawBitmap(mDrawingLayer, 0.0f, 0.0f, p);
+            }
             canvas.restore();
         }
-
-
-
-
 
     }
 
@@ -367,11 +373,19 @@ public class PaintView extends View {
     private void fillBrushWithColor(Brush brush, float x, float y, float tipAlpha) {
         //int color = mLineColor;
         int color;
+        float drawingAlpha;
+
+        if(mBrush.useSingleLayerStroke){
+            drawingAlpha = 1.0f;
+        }else {
+            drawingAlpha = mDrawingAlpha;
+        }
+
         if ((!this.mIsJitterColor) || brush.useFirstJitter) {
-            color = Color.argb((int) ((brush.colorPatchAlpha * tipAlpha) * 255.0f), Color.red(mLineColor), Color.green(mLineColor), Color.blue(mLineColor));
+            color = Color.argb((int) ((drawingAlpha * brush.colorPatchAlpha * tipAlpha) * 255.0f), Color.red(mLineColor), Color.green(mLineColor), Color.blue(mLineColor));
         } else {
             int jitterColor = jitterColor(this.mLineColor);
-            color = Color.argb((int) (tipAlpha * 255.0f), Color.red(jitterColor), Color.green(jitterColor), Color.blue(jitterColor));
+            color = Color.argb((int) (drawingAlpha * tipAlpha * 255.0f), Color.red(jitterColor), Color.green(jitterColor), Color.blue(jitterColor));
         }
 
         mPathLayerCanvas.drawColor(color, PorterDuff.Mode.SRC);
@@ -404,7 +418,11 @@ public class PaintView extends View {
     }
 
     private void mergeWithAlpha(float alpha, Paint paint, RectF rectF) {
-        paint.setAlpha((int) (255.0f * alpha));
+        if(mBrush.useSingleLayerStroke){
+            paint.setAlpha((int) (255.0f * alpha));
+        }else{
+            paint.setAlpha(255);
+        }
         this.mMergedLayerCanvas.save();
         this.mMergedLayerCanvas.clipRect(rectF);
         this.mMergedLayerCanvas.drawBitmap(this.mDrawingLayer, 0.0f, 0.0f, paint);
@@ -603,7 +621,6 @@ public class PaintView extends View {
         protected void onTouchUp() {
             Log.d("PaintView", "onTouchUp");
             PaintView.this.destLineThread();
-
         }
     }
 

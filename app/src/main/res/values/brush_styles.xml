@@ -477,6 +477,7 @@
         <item name="useFirstJitter">false</item>
         <item name="useFlowingAngle">false</item>
         <item name="useSmudging">false</item>
+        <item name="useSingleLayerStroke">true</item>
         <item name="defaultColor">#ffc51e1e</item>
     </style>
     <style name="Brush_WaterColor">
@@ -514,6 +515,7 @@
         <item name="useFirstJitter">false</item>
         <item name="useFlowingAngle">false</item>
         <item name="useSmudging">false</item>
+        <item name="useSingleLayerStroke">true</item>
         <item name="defaultColor">#ff43b3d4</item>
     </style>
     <style name="Brush_OilPastel">
