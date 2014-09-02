@@ -241,6 +241,9 @@ public class PaintView extends View {
         invalidate();
     }
 
+    public Bitmap getForegroundBitmap() {
+        return this.mMergedLayer;
+    }
 
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh) {

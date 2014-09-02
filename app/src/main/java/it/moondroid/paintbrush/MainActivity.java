@@ -6,12 +6,14 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
 import com.joanzapata.android.iconify.IconDrawable;
 import com.joanzapata.android.iconify.Iconify;
@@ -20,6 +22,7 @@ import it.moondroid.paintbrush.dialogs.HSVColorPickerDialog;
 import it.moondroid.paintbrush.drawing.Brush;
 import it.moondroid.paintbrush.drawing.Brushes;
 import it.moondroid.paintbrush.drawing.PaintView;
+import it.moondroid.paintbrush.util.ImageUtils;
 import it.moondroid.paintbrush.widget.OpacityPopupWindow;
 import it.moondroid.paintbrush.widget.PopupSeekBar;
 import it.moondroid.paintbrush.widget.SizePopupWindow;
@@ -49,6 +52,7 @@ public class MainActivity extends Activity {
         Brush brush = Brushes.get(getApplicationContext())[mCurrentBrushId];
         mFirstBrushButton.setImageResource(brush.iconId);
 
+        mPaintView.setDrawingCacheEnabled(true);
         mPaintView.setBrush(brush);
         setColor(brush.defaultColor);
         mPaintView.setDrawingBgColor(Color.WHITE);
@@ -160,6 +164,12 @@ public class MainActivity extends Activity {
                 new IconDrawable(this, Iconify.IconValue.fa_trash_o)
                         .color(Color.WHITE)
                         .actionBarSize());
+
+        menu.findItem(R.id.action_save).setIcon(
+                new IconDrawable(this, Iconify.IconValue.fa_save)
+                        .color(Color.WHITE)
+                        .actionBarSize());
+
         return true;
     }
 
@@ -188,6 +198,20 @@ public class MainActivity extends Activity {
                 }
                 return true;
 
+            case R.id.action_save:
+                ImageUtils.saveImageFromBitmap(this, mPaintView.getDrawingCache(), new ImageUtils.SaveImageListener() {
+
+                    @Override
+                    public void onCompleted(Uri uri) {
+                        Toast.makeText(MainActivity.this, getString(R.string.toast_image_saved), Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onError(int i) {
+                        Toast.makeText(MainActivity.this, getString(R.string.toast_image_save_error), Toast.LENGTH_SHORT).show();
+                    }
+                });
+                return true;
         }
 
         return super.onOptionsItemSelected(item);
