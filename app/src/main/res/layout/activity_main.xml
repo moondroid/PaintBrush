@@ -10,6 +10,22 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <IconButton
+        android:id="@+id/undoButton"
+        android:text="{fa-undo}"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentTop="true"/>
+
+    <IconButton
+        android:id="@+id/redoButton"
+        android:text="{fa-repeat}"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"/>
+
     <LinearLayout
         android:id="@+id/paletteLayout"
         android:layout_width="match_parent"

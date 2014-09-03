@@ -8,9 +8,11 @@ import android.content.Intent;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.IconButton;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.Toast;
@@ -28,7 +30,7 @@ import it.moondroid.paintbrush.widget.PopupSeekBar;
 import it.moondroid.paintbrush.widget.SizePopupWindow;
 
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements View.OnClickListener {
 
     private PaintView mPaintView;
     private PopupSeekBar mSizeSeekBar;
@@ -40,6 +42,8 @@ public class MainActivity extends Activity {
     private int mCurrentBrushId = 0; //default brush
 
     private static final int REQUEST_BRUSH_SELECT = 3;
+
+    IconButton mUndoButton, mRedoButton;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,8 +127,35 @@ public class MainActivity extends Activity {
                 startActivityForResult(brushSelect, REQUEST_BRUSH_SELECT);
             }
         });
+
+        mUndoButton = (IconButton) findViewById(R.id.undoButton);
+        mUndoButton.setOnClickListener(this);
+        mRedoButton = (IconButton) findViewById(R.id.redoButton);
+        mRedoButton.setOnClickListener(this);
+
+        mPaintView.setOnStateChangedListener(new PaintView.OnStateChangedListener() {
+
+            @Override
+            public void onResetCompleted() {
+            }
+
+            @Override
+            public void onUndoRedoChanged(int undoSize, int redoSize) {
+                Log.d("MainActivity", "onUndoRedoChanged undoSize:"+undoSize+" redoSize"+redoSize);
+                MainActivity.this.updateUndoRedo(undoSize, redoSize);
+            }
+        });
+        updateUndoRedo(0, 0);
     }
 
+    private void updateUndoRedo(int undoSize, int redoSize) {
+        if (undoSize != -1) {
+            mUndoButton.setEnabled(undoSize > 0);
+        }
+        if (redoSize != -1) {
+            mRedoButton.setEnabled(redoSize > 0);
+        }
+    }
 
     private void setScaledSize(float scaledSize) {
         mSizeSeekBar.setProgress((int) (scaledSize*100.0f));
@@ -230,6 +261,18 @@ public class MainActivity extends Activity {
                     break;
             }
 
+        }
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()){
+            case R.id.undoButton:
+                mPaintView.undo();
+                break;
+            case R.id.redoButton:
+                mPaintView.redo();
+                break;
         }
     }
 

@@ -83,6 +83,15 @@ public class PaintView extends View {
     private boolean mDrawingLayerNeedDrawn;
     private boolean mIsBatchDraw;
 
+    private BitmapHistoryManager mBitmapHistoryManager;
+    private BitmapHistoryManager.HistoryChangedListener mUndoRedoListener;
+    private OnStateChangedListener mOnStateChangedListener;
+
+    public static interface OnStateChangedListener {
+        void onResetCompleted();
+        void onUndoRedoChanged(int undoSize, int redoSize);
+    }
+
     private static interface OnTouchHandler {
         boolean onTouchEvent(int i, MotionEvent motionEvent);
     }
@@ -136,6 +145,23 @@ public class PaintView extends View {
         mRandom = new Random();
         mMatrix = new Matrix();
         mOldPt = new PointF();
+
+        mUndoRedoListener = new BitmapHistoryManager.HistoryChangedListener() {
+
+            @Override
+            public void onHistoryChanged(int prevLength, int nextLength, int commandType, int mode) {
+                if (PaintView.this.mOnStateChangedListener != null) {
+                    PaintView.this.mOnStateChangedListener.onUndoRedoChanged(prevLength, nextLength);
+                    if (commandType == BitmapHistoryManager.COMMAND_RESET) {
+                        PaintView.this.mOnStateChangedListener.onResetCompleted();
+                    }
+                }
+                if ((commandType == BitmapHistoryManager.COMMAND_RESET && mode == BitmapHistoryManager.RESET_RESTORE) || commandType == BitmapHistoryManager.COMMAND_READ) {
+                    PaintView.this.invalidate();
+                }
+            }
+        };
+        mBitmapHistoryManager = new SimpleBitmapHistoryManager(context, mUndoRedoListener);
 
     }
 
@@ -225,8 +251,7 @@ public class PaintView extends View {
 
 
     public boolean isClear() {
-        //return (this.mBitmapHistoryManager.isEmpty() && this.mBackgroundBitmap == null) ? true : false;
-        return false;
+        return (this.mBitmapHistoryManager.isEmpty()) ? true : false;
     }
 
     public void clear() {
@@ -234,9 +259,27 @@ public class PaintView extends View {
         //setDrawingBackgroundBitmap(null);
     }
 
+    public void undo() {
+        mBitmapHistoryManager.moveHistoryBy(-1);
+    }
+
+    public void redo() {
+        mBitmapHistoryManager.moveHistoryBy(1);
+    }
+
+    public void setOnStateChangedListener(OnStateChangedListener listener) {
+        mOnStateChangedListener = listener;
+    }
+
     public void setDrawingForegroundBitmap(Bitmap bitmap) {
         this.mDrawingLayerCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.SRC);
         this.mMergedLayerCanvas.drawColor(Color.TRANSPARENT, PorterDuff.Mode.SRC);
+        if (bitmap == null) {
+            this.mBitmapHistoryManager.reset(BitmapHistoryManager.RESET_CLEAR);
+        } else {
+            this.mMergedLayerCanvas.drawBitmap(bitmap, 0.0f, 0.0f, this.mSrcPaint);
+            this.mBitmapHistoryManager.reset(BitmapHistoryManager.RESET_REBASE);
+        }
 
         invalidate();
     }
@@ -259,6 +302,9 @@ public class PaintView extends View {
         this.mTextureLayerCanvas.setBitmap(this.mTextureLayer);
         this.mTextureDrawable.setBounds(0, 0, w, h);
         this.mTextureDrawable.draw(this.mTextureLayerCanvas);
+
+        this.mBitmapHistoryManager.init(getContext(), this.mMergedLayer, this.mMergedLayerCanvas);
+        this.mBitmapHistoryManager.reset(BitmapHistoryManager.RESET_RESTORE);
 
     }
 
@@ -371,7 +417,14 @@ public class PaintView extends View {
         mDirtyRect.union(drawX - this.mPathWidthHalf, drawY - this.mPathWidthHalf,
                 this.mPathWidthHalf + drawX, this.mPathWidthHalf + drawY);
 
+        mBitmapHistoryManager.addDirtyArea(drawX - this.mPathWidthHalf, drawY - this.mPathWidthHalf, this.mPathWidthHalf + drawX, this.mPathWidthHalf + drawY);
+
     }
+
+    private void addUndo() {
+        mBitmapHistoryManager.saveDirtyAreaToHistory();
+    }
+
 
     private void fillBrushWithColor(Brush brush, float x, float y, float tipAlpha) {
         //int color = mLineColor;
@@ -417,6 +470,9 @@ public class PaintView extends View {
             mergeWithAlpha(this.mDrawingAlpha, this.mDstOutPaint, this.mLineDirtyRect);
         } else {
             mergeWithAlpha(this.mDrawingAlpha, this.mNormalPaint, this.mLineDirtyRect);
+        }
+        if (!(this.mIsBatchDraw)) {
+            addUndo();
         }
     }
 
@@ -465,6 +521,7 @@ public class PaintView extends View {
     private void resetDrawingDirtyRect() {
         this.mLineDirtyRect.setEmpty();
         this.mDrawingLayerNeedDrawn = true;
+        this.mBitmapHistoryManager.clearDirtyArea();
     }
 
     private void drawBrushWithScale(float x, float y, float tipScale) {
@@ -534,6 +591,7 @@ public class PaintView extends View {
     public void release() {
         releaseViewSizeBitmaps();
         releaseBrushSizeBitmaps();
+        mBitmapHistoryManager.release();
     }
 
     private void releaseBrushSizeBitmaps() {
