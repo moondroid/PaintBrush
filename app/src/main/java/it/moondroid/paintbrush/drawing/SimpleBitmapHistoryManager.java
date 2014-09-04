@@ -23,12 +23,15 @@ public class SimpleBitmapHistoryManager implements BitmapHistoryManager {
     private static final Bitmap EMPTY_BITMAP;
     private static final int HISTORY_MAX_SIZE = 20;
     private static final String TAG = "SimpleBitmapHistoryManager";
+    private static final String IMAGE_CACHE_DIR = "paintbrush_hystory";
+    private static final String IMAGE_CACHE_FILE = "snapshot";
 
     private Bitmap mChunkBitmap;
     private Canvas mChunkCanvas;
-    private Paint mSrcPaint;
-    private Bitmap mTotalBitmap;
-    private Canvas mTotalCanvas;
+
+    private static Paint mSrcPaint;
+    private static Bitmap mTotalBitmap;
+    private static Canvas mTotalCanvas;
 
     private final HistoryChangedListener mHistoryChangedListener;
     private boolean mIsHistoryEmpty;
@@ -42,6 +45,7 @@ public class SimpleBitmapHistoryManager implements BitmapHistoryManager {
     private static HistoryHandlerThread sHistoryHandlerThread;
     private Handler mMainHandler;
 
+    private static ImageCache mImageCache;
 
     static {
         EMPTY_BITMAP = Build.VERSION.SDK_INT < 14 ? Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888) : null;
@@ -58,7 +62,7 @@ public class SimpleBitmapHistoryManager implements BitmapHistoryManager {
 
         synchronized (SimpleBitmapHistoryManager.class) {
             if (sHistoryHandlerThread == null) {
-                sHistoryHandlerThread = new HistoryHandlerThread(null);
+                sHistoryHandlerThread = new HistoryHandlerThread(context);
                 sHistoryHandlerThread.start();
             }
         }
@@ -97,27 +101,27 @@ public class SimpleBitmapHistoryManager implements BitmapHistoryManager {
 
     @Override
     public void addDirtyArea(float left, float top, float right, float bottom) {
-        //TODO
+        //TODO dirty area
     }
 
     @Override
     public void clearDirtyArea() {
-        //TODO
+        //TODO dirty area
     }
 
     @Override
     public void saveDirtyAreaToHistory() {
         HandlerData handlerData = new HandlerData();
-        //putDirtyAreaToHandlerData(handlerData, false);
-        handlerData.first = this.mHistoryListFirst;
-        handlerData.current = this.mHistoryListCurrent;
-        handlerData.last = this.mHistoryListLast;
+
         this.mHistoryListCurrent++;
         this.mHistoryListLast = this.mHistoryListCurrent;
         int moveBy = this.mHistoryListLast - this.mHistoryListFirst - HISTORY_MAX_SIZE;
         if (moveBy > 0) {
             this.mHistoryListFirst += moveBy;
         }
+        handlerData.first = this.mHistoryListFirst;
+        handlerData.current = this.mHistoryListCurrent;
+        handlerData.last = this.mHistoryListLast;
         handlerData.moveBy = moveBy;
         this.mHistoryListMoveBy = 0;
         notifyHistoryChanged(this.mHistoryListCurrent - this.mHistoryListFirst, 0, COMMAND_WRITE, 0);
@@ -147,7 +151,7 @@ public class SimpleBitmapHistoryManager implements BitmapHistoryManager {
         this.mTotalBitmap = bitmap;
         this.mTotalCanvas = canvas;
 
-        ///this.mCommandManager.sendToWorkerHandler(COMMAND_INFO, null, this.mRows * this.mCols);
+        mCommandManager.sendToWorkerHandler(COMMAND_INFO, null, 0);
 
     }
 
@@ -159,7 +163,7 @@ public class SimpleBitmapHistoryManager implements BitmapHistoryManager {
 
     @Override
     public void release() {
-        //this.mCommandManager.sendToWorkerHandler(COMMAND_QUIT);
+        mCommandManager.sendToWorkerHandler(COMMAND_QUIT);
 
         this.mChunkCanvas.setBitmap(EMPTY_BITMAP);
         this.mChunkBitmap.recycle();
@@ -175,8 +179,14 @@ public class SimpleBitmapHistoryManager implements BitmapHistoryManager {
         this.mHistoryListLast = 0;
         this.mHistoryListMoveBy = 0;
 
+        HandlerData handlerData = new HandlerData();
+        handlerData.first = 0;
+        handlerData.current = 0;
+        handlerData.last = 0;
+
         notifyHistoryChanged(0, 0, 0, mode);
-        //this.mCommandManager.sendToWorkerHandler(COMMAND_RESET, handlerData, mode);
+
+        mCommandManager.sendToWorkerHandler(COMMAND_RESET, handlerData, mode);
     }
 
     private void notifyHistoryChanged(int prevLength, int nextLength, int commandType, int mode) {
@@ -241,29 +251,38 @@ public class SimpleBitmapHistoryManager implements BitmapHistoryManager {
             switch (msg.what) {
 
                 case COMMAND_RESET:
-                    //TODO db close, destroy and reopen
-                    resetHistoryList(msg);
-                    commandManager.replyToMainHandler(msg);
+                    Log.d(TAG, "COMMAND_RESET");
+                    if(resetHistoryList(msg)){
+                        commandManager.replyToMainHandler(msg);
+                    }
                     break;
 
                 case COMMAND_WRITE:
+                    Log.d(TAG, "COMMAND_WRITE");
                     if (writeHistory(msg)) {
                         commandManager.replyToMainHandler(msg);
                     }
                     break;
 
                 case COMMAND_READ:
+                    Log.d(TAG, "COMMAND_READ");
                     if (readHistory(msg)) {
                         commandManager.replyToMainHandler(msg);
                     }
                     break;
 
                 case COMMAND_QUIT:
-                    //TODO close db
+                    Log.d(TAG, "COMMAND_QUIT");
+                    if(deleteHistory(msg)){
+                        commandManager.replyToMainHandler(msg);
+                    }
                     break;
 
                 case COMMAND_INFO:
-                    //TODO
+                    Log.d(TAG, "COMMAND_INFO");
+                    if(initHistory(msg)){
+                        commandManager.replyToMainHandler(msg);
+                    }
                     break;
 
                 default:
@@ -272,9 +291,29 @@ public class SimpleBitmapHistoryManager implements BitmapHistoryManager {
 
         }
 
-        private void resetHistoryList(Message msg) {
+        private boolean initHistory(Message msg){
+            //init cache
+            ImageCache.ImageCacheParams cacheParams =
+                    new ImageCache.ImageCacheParams(mContext, IMAGE_CACHE_DIR);
+            //cacheParams.setMemCacheSizePercent(0.5f); // Set memory cache to 50% of app memory
+            cacheParams.memoryCacheEnabled = false;
+            cacheParams.diskCacheEnabled = true;
+            mImageCache = new ImageCache(cacheParams);
+
+            return true;
+        }
+
+        private boolean resetHistoryList(Message msg) {
             mHistoryList.clear();
-            writeHistory(msg);
+            mImageCache.clearCache();
+            return writeHistory(msg);
+        }
+
+        private boolean deleteHistory(Message msg){
+            //delete cache
+            mImageCache.clearCache();
+            mImageCache.close();
+            return true;
         }
 
         private boolean writeHistory(Message msg) {
@@ -284,7 +323,8 @@ public class SimpleBitmapHistoryManager implements BitmapHistoryManager {
                 return true;
             }
 
-            //TODO write bitmap
+            //write bitmap to cache
+            mImageCache.addBitmapToCache(IMAGE_CACHE_FILE+handlerData.current, mTotalBitmap);
             Log.d(TAG, "writeHistory handlerData.current:"+handlerData.current);
             long[] chunkIdArray = new long[1];
             chunkIdArray[0] = getLongFromCurrentPosition(handlerData.current);
@@ -298,10 +338,17 @@ public class SimpleBitmapHistoryManager implements BitmapHistoryManager {
 //            long[] src = (long[]) this.mHistoryList.get(handlerData.current - handlerData.first);
 //            long[] dst = (long[]) this.mHistoryList.get(newCurrent - handlerData.first);
 
-            //TODO read bitmap
-            Log.d(TAG, "readHistory handlerData.moveBy:"+handlerData.moveBy);
-            handlerData.current = newCurrent;
-            return true;
+            //read bitmap from cache
+            Bitmap readBitmap = mImageCache.getBitmapFromDiskCache(IMAGE_CACHE_FILE+newCurrent);
+            if (readBitmap!=null){
+                mTotalCanvas.drawBitmap(readBitmap, 0, 0, mSrcPaint);
+                handlerData.current = newCurrent;
+                Log.d(TAG, "readHistory handlerData.current:"+handlerData.current);
+                return true;
+            }
+
+            Log.d(TAG, "readHistory handlerData.current:"+handlerData.current);
+            return false;
         }
 
         private static long getLongFromCurrentPosition(int i) {
