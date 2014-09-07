@@ -91,7 +91,7 @@ public class PaintView extends View {
     public PaintView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        this.mTextureDrawable = new BitmapDrawable(getResources(), BitmapFactory.decodeResource(getResources(), R.drawable.texture01));
+        this.mTextureDrawable = new BitmapDrawable(getResources(), BitmapFactory.decodeResource(getResources(), R.drawable.texture04));
         this.mTextureDrawable.setTileModeXY(Shader.TileMode.REPEAT, Shader.TileMode.REPEAT);
 
         mNormalPaint = new Paint(Paint.FILTER_BITMAP_FLAG);
