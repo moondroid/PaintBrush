@@ -701,6 +701,7 @@
         <item name="useFirstJitter">false</item>
         <item name="useFlowingAngle">true</item>
         <item name="useSmudging">true</item>
+        <item name="useSingleLayerStroke">true</item>
     </style>
     <style name="Brush_Knife2">
         <item name="angle">0.0</item>
@@ -737,6 +738,7 @@
         <item name="useFirstJitter">false</item>
         <item name="useFlowingAngle">true</item>
         <item name="useSmudging">true</item>
+        <item name="useSingleLayerStroke">true</item>
     </style>
     <style name="Brush_CombKnife">
         <item name="angle">0.0</item>
@@ -773,6 +775,7 @@
         <item name="useFirstJitter">false</item>
         <item name="useFlowingAngle">true</item>
         <item name="useSmudging">true</item>
+        <item name="useSingleLayerStroke">true</item>
     </style>
     <style name="Brush_ColorlessOil">
         <item name="angle">0.0</item>
@@ -809,6 +812,7 @@
         <item name="useFirstJitter">false</item>
         <item name="useFlowingAngle">true</item>
         <item name="useSmudging">true</item>
+        <item name="useSingleLayerStroke">true</item>
     </style>
     <style name="Brush_Finger">
         <item name="angle">0.0</item>
@@ -845,6 +849,7 @@
         <item name="useFirstJitter">false</item>
         <item name="useFlowingAngle">false</item>
         <item name="useSmudging">true</item>
+        <item name="useSingleLayerStroke">true</item>
         <item name="defaultColor">#00ffffff</item>
     </style>
     <style name="Brush_InkSpot">
