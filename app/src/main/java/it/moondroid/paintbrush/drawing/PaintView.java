@@ -466,14 +466,16 @@ public class PaintView extends View {
     }
 
     private void destLineThread() {
+        if (!(this.mIsBatchDraw)) {
+            addUndo();
+        }
+
         if (this.mBrush.isEraser) {
             mergeWithAlpha(this.mDrawingAlpha, this.mDstOutPaint, this.mLineDirtyRect);
         } else {
             mergeWithAlpha(this.mDrawingAlpha, this.mNormalPaint, this.mLineDirtyRect);
         }
-        if (!(this.mIsBatchDraw)) {
-            addUndo();
-        }
+
     }
 
     private void mergeWithAlpha(float alpha, Paint paint, RectF rectF) {

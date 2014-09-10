@@ -3,9 +3,11 @@ package it.moondroid.paintbrush.drawing;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.RectF;
 import android.os.Build;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -30,6 +32,7 @@ public class SimpleBitmapHistoryManager implements BitmapHistoryManager {
     private Canvas mChunkCanvas;
 
     private static Paint mSrcPaint;
+    private static Paint mTransparentPaint;
     private static Bitmap mTotalBitmap;
     private static Canvas mTotalCanvas;
 
@@ -47,6 +50,8 @@ public class SimpleBitmapHistoryManager implements BitmapHistoryManager {
 
     private static ImageCache mImageCache;
 
+    private static RectF mDirtyRect;
+
     static {
         EMPTY_BITMAP = Build.VERSION.SDK_INT < 14 ? Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888) : null;
     }
@@ -57,6 +62,9 @@ public class SimpleBitmapHistoryManager implements BitmapHistoryManager {
         this.mChunkCanvas = new Canvas(this.mChunkBitmap);
         this.mSrcPaint = new Paint();
         this.mSrcPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC));
+        this.mTransparentPaint = new Paint();
+        this.mTransparentPaint.setColor(Color.TRANSPARENT);
+        this.mTransparentPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
         this.mIsHistoryEmpty = true;
         this.mHistoryChangedListener = listener;
 
@@ -96,17 +104,19 @@ public class SimpleBitmapHistoryManager implements BitmapHistoryManager {
 
         mCommandManager = new CommandManagerHandler(mMainHandler, sHistoryHandlerThread);
 
-
+        mDirtyRect = new RectF();
     }
 
     @Override
     public void addDirtyArea(float left, float top, float right, float bottom) {
         //TODO dirty area
+        mDirtyRect.union(left, top, right, bottom);
     }
 
     @Override
     public void clearDirtyArea() {
         //TODO dirty area
+        mDirtyRect.setEmpty();
     }
 
     @Override
@@ -150,6 +160,8 @@ public class SimpleBitmapHistoryManager implements BitmapHistoryManager {
     public void init(Context context, Bitmap bitmap, Canvas canvas) {
         this.mTotalBitmap = bitmap;
         this.mTotalCanvas = canvas;
+
+        mDirtyRect = new RectF(0 ,0, mTotalBitmap.getWidth(), mTotalBitmap.getHeight());
 
         mCommandManager.sendToWorkerHandler(COMMAND_INFO, null, 0);
 
@@ -239,7 +251,7 @@ public class SimpleBitmapHistoryManager implements BitmapHistoryManager {
     private static class HistoryHandlerThread extends HandlerThread {
 
         private final Context mContext;
-        private final LinkedList<long[]> mHistoryList;
+        private final LinkedList<RectF> mHistoryList;
 
         private HistoryHandlerThread(Context context) {
             super("HistoryManagerThread");
@@ -324,11 +336,18 @@ public class SimpleBitmapHistoryManager implements BitmapHistoryManager {
             }
 
             //write bitmap to cache
-            mImageCache.addBitmapToCache(IMAGE_CACHE_FILE+handlerData.current, mTotalBitmap);
+            Bitmap dirtyBitmap = Bitmap.createBitmap(mTotalBitmap, (int)mDirtyRect.left, (int)mDirtyRect.top,
+                    (int)(mDirtyRect.right - mDirtyRect.left),  (int)(mDirtyRect.bottom - mDirtyRect.top));
+
+            mImageCache.addBitmapToCache(IMAGE_CACHE_FILE+handlerData.current, dirtyBitmap);
             Log.d(TAG, "writeHistory handlerData.current:"+handlerData.current);
-            long[] chunkIdArray = new long[1];
-            chunkIdArray[0] = getLongFromCurrentPosition(handlerData.current);
-            this.mHistoryList.addLast(chunkIdArray);
+            Log.d(TAG, "writeHistory bitmap size:"+dirtyBitmap.getWidth()+"x"+dirtyBitmap.getHeight());
+            Log.d(TAG, "writeHistory mDirtyRect:"+mDirtyRect.toString());
+
+            RectF dirtyRect = new RectF();
+            dirtyRect.set(mDirtyRect);
+            this.mHistoryList.addLast(dirtyRect);
+
             return true;
         }
 
@@ -341,9 +360,23 @@ public class SimpleBitmapHistoryManager implements BitmapHistoryManager {
             //read bitmap from cache
             Bitmap readBitmap = mImageCache.getBitmapFromDiskCache(IMAGE_CACHE_FILE+newCurrent);
             if (readBitmap!=null){
+
+                mTotalCanvas.save();
+                mTotalCanvas.clipRect(mHistoryList.get(handlerData.current));
+                mTotalCanvas.drawPaint(mTransparentPaint);
+                mTotalCanvas.restore();
+
+                mTotalCanvas.save();
+                mTotalCanvas.clipRect(mHistoryList.get(newCurrent));
                 mTotalCanvas.drawBitmap(readBitmap, 0, 0, mSrcPaint);
+//                mTotalCanvas.drawColor(Color.GREEN);
+                mTotalCanvas.restore();
+
                 handlerData.current = newCurrent;
                 Log.d(TAG, "readHistory handlerData.current:"+handlerData.current);
+                Log.d(TAG, "readHistory bitmap size:"+readBitmap.getWidth()+"x"+readBitmap.getHeight());
+                Log.d(TAG, "readHistory dirtyRect:"+mHistoryList.get(newCurrent).toString());
+
                 return true;
             }
 
